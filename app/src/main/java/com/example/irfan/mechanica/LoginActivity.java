@@ -23,7 +23,7 @@ public class LoginActivity extends AppCompatActivity {
     @BindView(R.id.et_mobile_num) EditText etMobileNumber;
     @BindView(R.id.et_password) EditText etPassword;
     @BindView(R.id.btn_signin) Button btnSignUp;
-    @BindView(R.id.btn_goto_signup) Button btnBack;
+    @BindView(R.id.btn_goto_signup) Button btnOnSignUp;
 
     private FirebaseAuth auth;
 
@@ -91,14 +91,13 @@ public class LoginActivity extends AppCompatActivity {
     public void startMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-        finish();
+        this.finish();
     }
 
 
     @OnClick(R.id.btn_goto_signup)
-    public void setBtnBack() {
+    public void setOpenSignUp() {
         Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
         startActivity(intent);
-        finish();
     }
 }
