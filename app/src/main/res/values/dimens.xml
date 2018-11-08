@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="font_small">12sp</dimen>
+    <dimen name="font_normal">15sp</dimen>
+    <dimen name="font_large">18sp</dimen>
+    <dimen name="font_extra_large">22sp</dimen>
+
+    <dimen name="spacing_tiny">7dp</dimen>
+    <dimen name="spacing_ex_small">10dp</dimen>
+    <dimen name="spacing_small">12dp</dimen>
+    <dimen name="spacing_normal">15dp</dimen>
+    <dimen name="spacing_long">20dp</dimen>
+    <dimen name="spacing_extra_long">25dp</dimen>
+
+    <dimen name="spacing_big">30dp</dimen>
+    <dimen name="spacing_huge">60dp</dimen>
+
+    <dimen name="spacing_login_side_margin">35dp</dimen>
+</resources>

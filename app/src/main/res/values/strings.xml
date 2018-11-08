@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Mechanica</string>
+
+    <string name="logo_des">Logo</string>
+
+    <!--Sign Up or Login-->
+    <string name="hint_username">Username</string>
+    <string name="hint_email">Email Address</string>
+    <string name="hint_phone_num">Phone Number</string>
+    <string name="hint_password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="question_dont_have_acc">Don\'t have an account?</string>
+    <string name="btn_text_sign_up_here">Sign Up Here</string>
+    <string name="btn_text_back">Back</string>
+
+</resources>
