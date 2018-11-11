@@ -1,4 +1,4 @@
-package com.example.irfan.mechanica;
+package com.example.fyp.mechanica;
 
 import org.junit.Test;
 

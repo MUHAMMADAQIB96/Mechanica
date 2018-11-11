@@ -1,16 +1,14 @@
-package com.example.irfan.mechanica;
+package com.example.fyp.mechanica;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,12 +20,18 @@ import butterknife.OnClick;
 
 public class SignupActivity extends AppCompatActivity {
 
-    @BindView(R.id.et_username) EditText etUsername;
-    @BindView(R.id.et_email) EditText etEmail;
-    @BindView(R.id.et_mobile_num) EditText etMobileNumber;
-    @BindView(R.id.et_password) EditText etPassword;
-    @BindView(R.id.btn_signup) Button btnSignUp;
-    @BindView(R.id.btn_back) Button btnBack;
+    @BindView(R.id.et_username)
+    EditText etUsername;
+    @BindView(R.id.et_email)
+    EditText etEmail;
+    @BindView(R.id.et_mobile_num)
+    EditText etMobileNumber;
+    @BindView(R.id.et_password)
+    EditText etPassword;
+    @BindView(R.id.btn_signup)
+    Button btnSignUp;
+    @BindView(R.id.btn_back)
+    Button btnBack;
 
     FirebaseAuth auth;
 
@@ -76,27 +80,27 @@ public class SignupActivity extends AppCompatActivity {
             etPassword.setError(null);
         }
 
-      if (!flag) {
-          return;
-      }
+        if (!flag) {
+            return;
+        }
 
-      auth.createUserWithEmailAndPassword(etEmail.getText().toString(), etPassword.getText().toString())
-              .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                  @Override
-                  public void onComplete(@NonNull Task<AuthResult> task) {
-                      if (task.isSuccessful()) {
-                          FirebaseUser firebaseUser = auth.getCurrentUser();
+        auth.createUserWithEmailAndPassword(etEmail.getText().toString(), etPassword.getText().toString())
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            FirebaseUser firebaseUser = auth.getCurrentUser();
 
-                        Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
 
-                      } else {
-                          // if sign up fails, display a message
-                          Toast.makeText(SignupActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                      }
-                  }
-              });
+                        } else {
+                            // if sign up fails, display a message
+                            Toast.makeText(SignupActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     @OnClick(R.id.btn_back)
