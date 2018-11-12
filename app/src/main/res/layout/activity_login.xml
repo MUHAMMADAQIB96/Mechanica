@@ -25,7 +25,7 @@
             android:contentDescription="@string/logo_des"/>
 
         <EditText
-            android:id="@+id/et_mobile_num"
+            android:id="@+id/et_phone_num"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/edit_text_border"

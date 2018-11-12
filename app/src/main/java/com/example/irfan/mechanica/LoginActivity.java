@@ -13,6 +13,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -20,7 +22,7 @@ import butterknife.OnClick;
 
 public class LoginActivity extends AppCompatActivity {
 
-    @BindView(R.id.et_mobile_num) EditText etMobileNumber;
+    @BindView(R.id.et_phone_num) EditText etMobileNumber;
     @BindView(R.id.et_password) EditText etPassword;
     @BindView(R.id.btn_signin) Button btnSignUp;
     @BindView(R.id.btn_goto_signup) Button btnOnSignUp;
@@ -34,6 +36,8 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         auth = FirebaseAuth.getInstance();
+
+//        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
     }
 
     @Override
