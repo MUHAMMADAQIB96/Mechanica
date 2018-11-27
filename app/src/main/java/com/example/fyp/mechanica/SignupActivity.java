@@ -1,7 +1,8 @@
-package com.example.irfan.mechanica;
+package com.example.fyp.mechanica;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +36,7 @@ public class SignupActivity extends AppCompatActivity {
     @BindView(R.id.et_password) EditText etPassword;
     @BindView(R.id.btn_signup) Button btnSignUp;
     @BindView(R.id.btn_back) Button btnBack;
+
 
     private String inputCode, verificationId;
     FirebaseAuth auth;
@@ -84,9 +86,9 @@ public class SignupActivity extends AppCompatActivity {
             etPassword.setError(null);
         }
 
-      if (!flag) {
-          return;
-      }
+        if (!flag) {
+            return;
+        }
 
         showDialog();
         sendVerificationCode();
@@ -111,6 +113,7 @@ public class SignupActivity extends AppCompatActivity {
 
 //
     }
+
 
     @OnClick(R.id.btn_back)
     public void setBtnBack() {
@@ -212,6 +215,7 @@ public class SignupActivity extends AppCompatActivity {
         public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
             super.onCodeSent(s, forceResendingToken);
             verificationId = s;
+
         }
     };
 }

@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "725100880069",
-    "firebase_url": "https://mechanica-9c33b.firebaseio.com",
-    "project_id": "mechanica-9c33b",
-    "storage_bucket": "mechanica-9c33b.appspot.com"
+    "project_number": "615580150705",
+    "firebase_url": "https://mechanica-3ca3d.firebaseio.com",
+    "project_id": "mechanica-3ca3d",
+    "storage_bucket": "mechanica-3ca3d.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:725100880069:android:76de47e194fd89f1",
+        "mobilesdk_app_id": "1:615580150705:android:b002eef56ead4add",
         "android_client_info": {
-          "package_name": "com.example.irfan.mechanica"
+          "package_name": "com.example.fyp.mechanica"
         }
       },
       "oauth_client": [
         {
-          "client_id": "725100880069-qru222pur20j5j80p66scpsmv4gbpeeb.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.irfan.mechanica",
-            "certificate_hash": "2ae1d46a1cb696c5313900d64a420c87b116c300"
-          }
-        },
-        {
-          "client_id": "725100880069-ad8j4odkptt9nitbnkh5c3063rlla3h1.apps.googleusercontent.com",
+          "client_id": "615580150705-il3flmngb344ont00joape0gjkmguhs0.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAj1v38l1T-am-s_xeQriIZP5nvfg1rayQ"
+          "current_key": "AIzaSyCPhWX1bh-D_81D_1iRMcINDcPszAmhJD8"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "725100880069-ad8j4odkptt9nitbnkh5c3063rlla3h1.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

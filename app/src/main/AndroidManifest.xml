@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.irfan.mechanica">
+    package="com.example.fyp.mechanica">
 
     <application
         android:allowBackup="true"
@@ -9,10 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.example.irfan.mechanica.MainActivity">
+        <activity android:name="com.example.fyp.mechanica.MainActivity">
 
         </activity>
-        <activity android:name="com.example.irfan.mechanica.SplashActivity">
+        <activity android:name="com.example.fyp.mechanica.SplashActivity">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,9 +21,9 @@
             </intent-filter>
 
         </activity>
-        <activity android:name="com.example.irfan.mechanica.LoginActivity" />
+        <activity android:name="com.example.fyp.mechanica.LoginActivity" />
 
-        <activity android:name="com.example.irfan.mechanica.SignupActivity">
+        <activity android:name="com.example.fyp.mechanica.SignupActivity">
 
         </activity>
 

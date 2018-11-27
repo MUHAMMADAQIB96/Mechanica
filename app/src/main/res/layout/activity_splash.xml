@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/splash_img"
-    tools:context="com.example.irfan.mechanica.SplashActivity"
+    tools:context="com.example.fyp.mechanica.SplashActivity"
     android:id="@+id/rl_splash">
 
 </RelativeLayout>

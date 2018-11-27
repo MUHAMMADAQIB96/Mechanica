@@ -4,7 +4,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.example.irfan.mechanica"
+        applicationId "com.example.fyp.mechanica"
         minSdkVersion 21
         targetSdkVersion 26
         versionCode 1
@@ -19,6 +19,12 @@ android {
         }
     }
 }
+
+/*
+* keystore
+* alias: mechanica
+* pass: 123456
+* */
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
