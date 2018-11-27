@@ -101,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_goto_signup)
     public void setOpenSignUp() {
-        Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+        Intent intent = new Intent(LoginActivity.this, UserRoleActivity.class);
         startActivity(intent);
     }
 }

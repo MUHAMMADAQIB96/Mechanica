@@ -3,6 +3,11 @@
 
     <string name="logo_des">Logo</string>
 
+    <!--User role-->
+    <string name="user_role_customer">I am customer</string>
+    <string name="user_role_mechanic">I am mechanic</string>
+
+
     <!--Sign Up or Login-->
     <string name="hint_username">Username</string>
     <string name="hint_email">Email Address</string>
@@ -14,4 +19,8 @@
     <string name="btn_text_sign_up_here">Sign Up Here</string>
     <string name="btn_text_back">Back</string>
 
+    <string name="google_map_api_key">AIzaSyCPhWX1bh-D_81D_1iRMcINDcPszAmhJD8</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
