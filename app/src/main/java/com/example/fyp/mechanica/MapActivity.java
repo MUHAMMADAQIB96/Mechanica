@@ -28,6 +28,7 @@ public class MapActivity extends AppCompatActivity {
         setContentView(R.layout.activity_map);
 
         getLocationPermission();
+
     }
 
     private void initMap() {
@@ -38,6 +39,7 @@ public class MapActivity extends AppCompatActivity {
                 map = googleMap;
             }
         });
+
     }
 
     public void getLocationPermission() {
@@ -78,6 +80,7 @@ public class MapActivity extends AppCompatActivity {
                         initMap();
                 }
         }
+
 
 
 }
