@@ -1,13 +1,18 @@
 package com.example.fyp.mechanica;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.fyp.mechanica.helpers.Constants;
+import com.example.fyp.mechanica.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -19,6 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.paperdb.Paper;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -94,7 +100,8 @@ public class SignupActivity extends AppCompatActivity {
                   public void onComplete(@NonNull Task<AuthResult> task) {
                       if (task.isSuccessful()) {
                           FirebaseUser firebaseUser = auth.getCurrentUser();
-                          User user = new User();
+                          final User user = new User();
+                          user.id = firebaseUser.getUid();
                           user.name = etUsername.getText().toString().trim();
                           user.email = etEmail.getText().toString().trim();
                           user.phoneNumber = etPhoneNumber.getText().toString().trim();
@@ -105,20 +112,21 @@ public class SignupActivity extends AppCompatActivity {
                           dbRef.child("users").child(firebaseUser.getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                               @Override
                               public void onComplete(@NonNull Task<Void> task) {
-                                Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
+                                  Paper.book().write(Constants.CURR_USER_KEY, user);
+                                  Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                                  startActivity(intent);
+                                  finish();
                               }
                           });
 
                       } else {
                           // if sign up fails, display a message
-                          Toast.makeText(SignupActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                          Toast.makeText(SignupActivity.this, task.getException().getMessage(),
+                                  Toast.LENGTH_SHORT).show();
                       }
                   }
               });
 
-//        showDialog();
 //        sendVerificationCode();
     }
 
@@ -129,50 +137,37 @@ public class SignupActivity extends AppCompatActivity {
     }
 
 
-//    public void showDialog() {
+    public void showDialog() {
 //
-//        AlertDialog.Builder alertDialog = new AlertDialog.Builder(SignupActivity.this);
-//        alertDialog.setTitle("Verify Number");
-//        alertDialog.setMessage("Enter Code");
-//
-//        final EditText input = new EditText(SignupActivity.this);
-//        int dp = (int) getResources().getDimension(R.dimen.spacing_normal);
-////        input.setBackground(ContextCompat.getDrawable(this, R.drawable.edit_text_border));
-//        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-//                LinearLayout.LayoutParams.WRAP_CONTENT,
-//                LinearLayout.LayoutParams.MATCH_PARENT);
-////        lp.setMargins(dp, dp, dp, dp);
-//        input.setLayoutParams(lp);
-//        alertDialog.setView(input);
-//
-//        alertDialog.setNegativeButton("Cancel",
-//                new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        dialog.cancel();
-//                    }
-//                });
-//
-//        alertDialog.setPositiveButton("Verify",
-//                new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int which) {
-//
+        AlertDialog.Builder builder = new AlertDialog.Builder(SignupActivity.this);
+        builder.setTitle("Enter Code");
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_enter_code_view, null);
+        builder.setView(view);
+
+        builder.setPositiveButton("Verify",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
 //                        inputCode = input.getText().toString();
 //                        if (!inputCode.isEmpty()) {
-//
-//                            verifySignInCode();
+//                                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, inputCode);
+//                                signInWithPhoneAuthCredential(credential);
 //                        }
-//                    }
-//                });
-//
-//        alertDialog.show();
-//    }
-//
-//    public void verifySignInCode() {
-//
-//        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, inputCode);
-//        signInWithPhoneAuthCredential(credential);
-//    }
-//
+                    }
+                });
+
+        builder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
 //    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
 //        auth.signInWithCredential(credential)
 //                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {

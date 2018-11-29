@@ -21,6 +21,7 @@ import java.security.PublicKey;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import permissions.dispatcher.RuntimePermissions;
 
 public class MainActivity extends FragmentActivity {
 
