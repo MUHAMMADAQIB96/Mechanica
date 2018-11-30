@@ -54,6 +54,7 @@ public class SignupActivity extends AppCompatActivity {
 
     }
 
+
     @OnClick(R.id.btn_signup)
     public void setBtnSignUp() {
         boolean flag = true;
@@ -112,8 +113,7 @@ public class SignupActivity extends AppCompatActivity {
                           dbRef.child("users").child(firebaseUser.getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                               @Override
                               public void onComplete(@NonNull Task<Void> task) {
-                                  Paper.book().write(Constants.CURR_USER_KEY, user);
-                                  Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                                  Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
                                   startActivity(intent);
                                   finish();
                               }

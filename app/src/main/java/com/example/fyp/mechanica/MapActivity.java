@@ -4,9 +4,11 @@ import android.Manifest;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,7 +30,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -46,14 +50,14 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
         OnMapReadyCallback,
-        GoogleMap.OnMyLocationButtonClickListener{
+        GoogleMap.OnMyLocationButtonClickListener {
 
 
     private boolean isPermGranted = false;
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
+//    private GoogleApiClient mGoogleApiClient;
+//    private LocationRequest mLocationRequest;
     private double currentLatitude;
     private double currentLongitude;
 
@@ -61,8 +65,13 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
     DatabaseReference dbRef;
     User currUser;
     String pushKey;
-    MLocation mLocation = new MLocation();
 
+    GoogleMap mGoogleMap;
+    SupportMapFragment mapFrag;
+    LocationRequest mLocationRequest;
+    GoogleApiClient mGoogleApiClient;
+    Location mLastLocation;
+    Marker mCurrLocationMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,19 +83,19 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 
         MapActivityPermissionsDispatcher.showMapWithPermissionCheck(this);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                // The next two lines tell the new client that “this” current class will handle connection stuff
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                //fourth line adds the LocationServices API endpoint from GooglePlayServices
-                .addApi(LocationServices.API)
-                .build();
-
-        // Create the LocationRequest object
-        mLocationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
-                .setFastestInterval(1 * 1000); // 1 second, in milliseconds
+//        mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                // The next two lines tell the new client that “this” current class will handle connection stuff
+//                .addConnectionCallbacks(this)
+//                .addOnConnectionFailedListener(this)
+//                //fourth line adds the LocationServices API endpoint from GooglePlayServices
+//                .addApi(LocationServices.API)
+//                .build();
+//
+//        // Create the LocationRequest object
+//        mLocationRequest = LocationRequest.create()
+//                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+//                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
+//                .setFastestInterval(1 * 1000); // 1 second, in milliseconds
 
 
         if (currUser.userRole.equals("Customer")) {
@@ -99,8 +108,10 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 
                         if (location != null) {
                             LatLng latLng = new LatLng(location.latitude, location.longitude);
-                            map.addMarker(new MarkerOptions().position(latLng).title("Mechanic"));
-                            map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                            mGoogleMap.addMarker(new MarkerOptions().position(latLng).title("Mechanic"));
+
+                            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(14));
 
                         }
 
@@ -189,20 +200,18 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
             mapFragment.getMapAsync(this);
         }
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //Now lets connect to the API
-        mGoogleApiClient.connect();
-    }
+//
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        //Now lets connect to the API
+//        mGoogleApiClient.connect();
+//    }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.v(this.getClass().getSimpleName(), "onPause()");
 
-        //Disconnect from API onPause()
         if (mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, (com.google.android.gms.location.LocationListener) MapActivity.this);
             mGoogleApiClient.disconnect();
@@ -227,33 +236,46 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, (LocationListener) this);
 
         } else {
-            //If everything went fine lets get latitude and longitude
-            currentLatitude = location.getLatitude();
-            currentLongitude = location.getLongitude();
+            if (currUser.userRole.equals("Mechanic")) {
 
-            LatLng latLng = new LatLng(currentLatitude, currentLongitude);
-            map.addMarker(new MarkerOptions().position(latLng).title("Me"));
-            map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                currentLatitude = location.getLatitude();
+                currentLongitude = location.getLongitude();
 
-            mLocation.latitude = currentLatitude;
-            mLocation.longitude = currentLongitude;
-            if (pushKey == null) {
-                pushKey = dbRef.child("lives").child(currUser.id).push().getKey();
+                LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(latLng);
+                markerOptions.title("Me");
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+                mCurrLocationMarker = mGoogleMap.addMarker(markerOptions);
 
-            } else {
-                dbRef.child("lives").child(currUser.id).child(pushKey).setValue(mLocation);
+                //move map camera
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+
+                MLocation mLocation = new MLocation();
+                mLocation.latitude = currentLatitude;
+                mLocation.longitude = currentLongitude;
+
+                dbRef.child("lives").child(currUser.id).setValue(mLocation);
             }
+        }
 
-            Log.d("TAG", String.valueOf(currentLatitude));
-            Log.d("TAG", String.valueOf(currentLongitude));
-
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10 * 1000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
+
 
     @Override
     public void onConnectionSuspended(int i) {
 
     }
+
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -284,42 +306,90 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
         }
     }
 
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+        mGoogleMap = googleMap;
+//        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        //Initialize Google Play Services
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                //Location Permission already granted
+                buildGoogleApiClient();
+                mGoogleMap.setMyLocationEnabled(true);
+                mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
+                mGoogleMap.setOnMyLocationButtonClickListener(this);
+
+            } else {
+                //Request Location Permission
+            }
+        }
+        else {
+            buildGoogleApiClient();
+            mGoogleMap.setMyLocationEnabled(true);
+        }
+
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
     @Override
     public void onLocationChanged(Location location) {
         currentLatitude = location.getLatitude();
         currentLongitude = location.getLongitude();
 
+        MLocation mLocation = new MLocation();
         mLocation.latitude = currentLatitude;
         mLocation.longitude = currentLongitude;
 
-        if (pushKey == null) {
-            pushKey = dbRef.child("lives").child(currUser.id).push().getKey();
+        if (currUser.userRole.equals("Mechanic")) {
+            dbRef.child("lives").child(currUser.id).setValue(mLocation);
 
-        } else {
-            dbRef.child("lives").child(currUser.id).child(pushKey).setValue(mLocation);
+            LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title("Current Position");
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+            mCurrLocationMarker = mGoogleMap.addMarker(markerOptions);
+
+            //move map camera
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(11));
         }
 
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-
-        map = googleMap;
-        if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapActivity.this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            return;
+        mLastLocation = location;
+        if (mCurrLocationMarker != null) {
+            mCurrLocationMarker.remove();
         }
 
-        map.setMyLocationEnabled(true);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.setOnMyLocationButtonClickListener(this);
-
+//        //Place current location marker
+//
     }
 
     @Override
     public boolean onMyLocationButtonClick() {
+
+        LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Current Position");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+        mCurrLocationMarker = mGoogleMap.addMarker(markerOptions);
+
+        //move map camera
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(14));
 
         return false;
     }
