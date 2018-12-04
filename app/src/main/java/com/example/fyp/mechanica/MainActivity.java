@@ -56,11 +56,16 @@ public class MainActivity extends FragmentActivity {
         super.onStart();
 
         User currUser = Paper.book().read(Constants.CURR_USER_KEY);
-        if (currUser.userRole.equals("Customer")) {
-            btnMap.setText("See Nearest Mechanics");
+        if (currUser != null) {
+            if (currUser.userRole.equals("Customer")) {
+                btnMap.setText("See Nearest Mechanics");
+
+            } else {
+                btnMap.setText("My Location");
+            }
 
         } else {
-            btnMap.setText("My Location");
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
     }
 

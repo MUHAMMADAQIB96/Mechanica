@@ -61,13 +61,10 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
     private double currentLatitude;
     private double currentLongitude;
 
-    private GoogleMap map;
     DatabaseReference dbRef;
     User currUser;
-    String pushKey;
 
     GoogleMap mGoogleMap;
-    SupportMapFragment mapFrag;
     LocationRequest mLocationRequest;
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
@@ -124,6 +121,12 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
                 }
             });
         }
+
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10 * 1000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
     }
 //    private void initMap() {
@@ -220,6 +223,13 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 
     @Override
     public void onConnected(Bundle bundle) {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
+
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -233,7 +243,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
         if (location == null) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, (LocationListener) this);
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, MapActivity.this);
 
         } else {
             if (currUser.userRole.equals("Mechanic")) {
@@ -260,14 +270,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
             }
         }
 
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10 * 1000);
-        mLocationRequest.setFastestInterval(1000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
+
     }
 
 
