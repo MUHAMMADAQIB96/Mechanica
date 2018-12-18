@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.example.fyp.mechanica.helpers.Constants;
 import com.example.fyp.mechanica.models.User;
+import com.example.fyp.mechanica.models.Vehicle;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -50,17 +51,6 @@ public class LoginActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         dbRef = FirebaseDatabase.getInstance().getReference();
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        FirebaseUser currentUser = auth.getCurrentUser();
-
-        if (currentUser != null) {
-            startMainActivity();
-        }
     }
 
     @OnClick(R.id.btn_signin)
@@ -97,7 +87,6 @@ public class LoginActivity extends AppCompatActivity {
 
                     FirebaseUser firebaseUser = auth.getCurrentUser();
                     getUserData(firebaseUser.getUid());
-                    startMainActivity();
 
                 } else {
                     Toast.makeText(LoginActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
@@ -112,8 +101,19 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
-                if (user != null)
-                    Paper.book().write(Constants.CURR_USER_KEY, user);
+
+//                List<Vehicle> vehicles = new ArrayList<Vehicle>();
+//                for (DataSnapshot snapshot : dataSnapshot.child("vehicles").getChildren()) {
+//                    Vehicle vehicle = snapshot.getValue(Vehicle.class);
+//                    if (vehicle != null) {
+//                        vehicle.key = snapshot.getKey();
+//                        vehicles.add(vehicle);
+//                    }
+//                }
+//                user.vehicles = vehicles;
+                Paper.book().write(Constants.CURR_USER_KEY, user);
+                startMainActivity();
+
             }
 
             @Override
@@ -125,7 +125,7 @@ public class LoginActivity extends AppCompatActivity {
     public void startMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-        this.finish();
+        finish();
     }
 
     @OnClick(R.id.btn_goto_signup)

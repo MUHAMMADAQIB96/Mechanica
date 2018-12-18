@@ -26,7 +26,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 Intent intent;
-                if (user != null) {
+                if (auth.getCurrentUser() != null) {
                     intent = new Intent(SplashActivity.this, MainActivity.class);
 
                 } else {
@@ -34,6 +34,7 @@ public class SplashActivity extends AppCompatActivity {
                 }
                 startActivity(intent);
                 finish();
+
             }
         }, 3000);
     }

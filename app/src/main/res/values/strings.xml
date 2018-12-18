@@ -23,4 +23,10 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="vehicle_info">Vehicle Information</string>
+    <string name="hint_vehicle_make">Vehicle Make</string>
+    <string name="hint_vehicle_type">Vehicle Type</string>
+    <string name="hint_vehicle_model">Vehicle Model</string>
+    <string name="btn_text_submit">Submit</string>
 </resources>

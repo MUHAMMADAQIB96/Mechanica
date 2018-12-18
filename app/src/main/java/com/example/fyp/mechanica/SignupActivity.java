@@ -106,7 +106,7 @@ public class SignupActivity extends AppCompatActivity {
                           user.name = etUsername.getText().toString().trim();
                           user.email = etEmail.getText().toString().trim();
                           user.phoneNumber = etPhoneNumber.getText().toString().trim();
-                          user.password = etPassword.getText().toString().trim();
+
                           if (userRole != null) {
                             user.userRole = userRole;
                           }

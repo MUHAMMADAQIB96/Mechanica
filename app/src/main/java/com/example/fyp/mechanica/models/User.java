@@ -1,15 +1,22 @@
 package com.example.fyp.mechanica.models;
 
-/**
- * Created by irfan on 11/27/18.
- */
 
-public class User {
+import java.io.Serializable;
+import java.util.List;
+
+public class User implements Serializable {
 
     public String id;
     public String name;
     public String userRole;
     public String email;
-    public String password;
     public String phoneNumber;
+
+//    public List<Vehicle> vehicles;
+
+    public Vehicle vehicle;
+
+    public User() {
+
+    }
 }

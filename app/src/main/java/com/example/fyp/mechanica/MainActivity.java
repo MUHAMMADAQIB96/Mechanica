@@ -16,6 +16,8 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -49,6 +51,7 @@ public class MainActivity extends FragmentActivity {
             init();
         }
 
+
     }
 
     @Override
@@ -59,6 +62,10 @@ public class MainActivity extends FragmentActivity {
         if (currUser != null) {
             if (currUser.userRole.equals("Customer")) {
                 btnMap.setText("See Nearest Mechanics");
+
+                if (currUser.vehicle == null) {
+                    startActivity(new Intent(this, UpdateProfileActivity.class));
+                }
 
             } else {
                 btnMap.setText("My Location");
@@ -104,6 +111,7 @@ public class MainActivity extends FragmentActivity {
 
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        Paper.book().delete(Constants.CURR_USER_KEY);
         startActivity(intent);
         finish();
     }
