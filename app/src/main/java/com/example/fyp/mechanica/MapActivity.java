@@ -211,15 +211,15 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 //        mGoogleApiClient.connect();
 //    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (mGoogleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, (com.google.android.gms.location.LocationListener) MapActivity.this);
-            mGoogleApiClient.disconnect();
-        }
-    }
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//
+//        if (mGoogleApiClient.isConnected()) {
+//            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, (com.google.android.gms.location.LocationListener) MapActivity.this);
+//            mGoogleApiClient.disconnect();
+//        }
+//    }
 
     @Override
     public void onConnected(Bundle bundle) {

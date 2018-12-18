@@ -21,12 +21,6 @@
             android:textSize="@dimen/font_large"
             android:text="username"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="You have Logged In"
-            android:layout_marginBottom="@dimen/spacing_big" />
-
         <Button
             android:id="@+id/btn_log_out"
             android:layout_width="wrap_content"

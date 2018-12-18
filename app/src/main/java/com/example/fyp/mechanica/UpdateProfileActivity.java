@@ -39,8 +39,12 @@ public class UpdateProfileActivity extends AppCompatActivity {
         currUser = Paper.book().read(Constants.CURR_USER_KEY);
         dbRef = FirebaseDatabase.getInstance().getReference();
 
-//        dbRef.child("users").child(currUser.id)
 
+        if (currUser.vehicle != null) {
+            etModel.setText(currUser.vehicle.model);
+            etMake.setText(currUser.vehicle.make);
+            etType.setText(currUser.vehicle.type);
+        }
     }
 
     @OnClick(R.id.btn_submit)

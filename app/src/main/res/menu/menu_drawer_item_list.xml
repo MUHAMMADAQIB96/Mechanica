@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_drawer_item_update"
+        android:title="Update Profile"
+        android:icon="@drawable/ic_person_24dp"/>
+
+    <item android:id="@+id/menu_drawer_item_about"
+        android:title="About"
+        android:icon="@drawable/ic_new_releases_24dp" />
+
+    <item
+        android:id="@+id/menu_drawer_item_feedback"
+        android:title="Feedback"
+        android:icon="@drawable/ic_reply_24dp"/>
+
+    <item
+        android:id="@+id/menu_drawer_item_sign_out"
+        android:title="Sign out"
+        android:icon="@drawable/ic_exit_to_app_24dp"/>
+
+</menu>

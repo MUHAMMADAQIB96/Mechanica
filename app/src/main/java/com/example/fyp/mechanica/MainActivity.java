@@ -23,7 +23,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.paperdb.Paper;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends BaseDrawerActivity {
 
     public static final int ERROR_DIALOG_REQUEST = 9001;
 
