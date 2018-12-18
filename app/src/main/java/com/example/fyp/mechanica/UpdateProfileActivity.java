@@ -84,14 +84,11 @@ public class UpdateProfileActivity extends AppCompatActivity {
         vehicle.make = etMake.getText().toString();
         vehicle.model = etModel.getText().toString();
         vehicle.type = etType.getText().toString();
-//        String key = dbRef.child("users").child(currUser.id).child("vehicles").push().getKey();
-//        vehicle.key = key;
 
         dbRef.child("users").child(currUser.id).child("vehicle").setValue(vehicle)
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-//                currUser.vehicles.add(vehicle);
                 currUser.vehicle = vehicle;
                 Paper.book().write(Constants.CURR_USER_KEY, currUser);
                 startActivity(new Intent(UpdateProfileActivity.this, MainActivity.class));

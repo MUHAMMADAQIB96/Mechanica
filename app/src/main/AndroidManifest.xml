@@ -40,7 +40,9 @@
 
         <activity android:name=".UserRoleActivity" />
         <activity android:name=".UpdateProfileActivity" />
-        <activity android:name=".BaseDrawerActivity"></activity>
+        <activity android:name=".BaseDrawerActivity" />
+        <activity android:name=".AboutActivity"
+            android:theme="@style/AppTheme.ActionBar"/>
     </application>
 
 </manifest>

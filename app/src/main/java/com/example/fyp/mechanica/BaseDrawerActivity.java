@@ -152,6 +152,10 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
                 startActivity(new Intent(this, UpdateProfileActivity.class));
                 break;
 
+            case R.id.menu_drawer_item_about:
+                startActivity(new Intent(this, AboutActivity.class));
+                break;
+
             case R.id.menu_drawer_item_sign_out:
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(this, LoginActivity.class);
