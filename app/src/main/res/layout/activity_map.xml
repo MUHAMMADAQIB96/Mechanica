@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.example.fyp.mechanica.MapActivity">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -11,7 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/map"
-        class="com.google.android.gms.maps.SupportMapFragment" />
+        class="com.google.android.gms.maps.SupportMapFragment">
+
+        <Button
+            android:id="@+id/btn_request"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_small"
+            android:text="Request"
+            android:textColor="@color/white"
+            android:background="@color/black_opacity"/>
+
+    </fragment>
 
 </LinearLayout>
 

@@ -1,17 +1,22 @@
 package com.example.fyp.mechanica;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.fyp.mechanica.helpers.Constants;
@@ -40,6 +45,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Map;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.paperdb.Paper;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
@@ -52,6 +62,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
         OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener {
 
+    @BindView(R.id.btn_request) Button btnRequest;
 
     private boolean isPermGranted = false;
 
@@ -70,10 +81,13 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
     Location mLastLocation;
     Marker mCurrLocationMarker;
 
+    AlertDialog dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        ButterKnife.bind(this);
 
         dbRef = FirebaseDatabase.getInstance().getReference();
         currUser = Paper.book().read(Constants.CURR_USER_KEY);
@@ -93,7 +107,6 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 //                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
 //                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
 //                .setFastestInterval(1 * 1000); // 1 second, in milliseconds
-
 
         if (currUser.userRole.equals("Customer")) {
 
@@ -221,6 +234,35 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 //        }
 //    }
 
+    @OnClick(R.id.btn_request)
+    public void setBtnRequest() {
+        final AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
+//        View mView = getLayoutInflater().inflate(R.layout.habit_done, null);
+//        mBuilder.setView(mView);
+
+        mBuilder.setTitle("Send Request");
+        mBuilder.setMessage("Send Request to the Nearest Mechanics");
+        mBuilder.setPositiveButton("Send", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                Toast.makeText(MapActivity.this, "Your request has been sent", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog = mBuilder.create();
+        dialog.show();
+
+    }
+
+
     @Override
     public void onConnected(Bundle bundle) {
 
@@ -338,6 +380,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 
     }
 
+
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -346,6 +389,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
                 .build();
         mGoogleApiClient.connect();
     }
+
 
     @Override
     public void onLocationChanged(Location location) {
@@ -379,6 +423,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 //        //Place current location marker
 //
     }
+
 
     @Override
     public boolean onMyLocationButtonClick() {

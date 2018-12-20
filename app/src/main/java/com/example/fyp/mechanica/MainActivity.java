@@ -15,6 +15,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 
@@ -29,8 +30,6 @@ public class MainActivity extends BaseDrawerActivity {
 
     @BindView(R.id.tv_username)
     TextView tvUsername;
-    @BindView(R.id.btn_log_out)
-    Button btnLogOut;
     Button btnMap;
     FirebaseAuth auth;
 
@@ -39,6 +38,8 @@ public class MainActivity extends BaseDrawerActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        FirebaseMessaging.getInstance().setAutoInitEnabled(true);
 
         auth = FirebaseAuth.getInstance();
 
@@ -103,17 +104,6 @@ public class MainActivity extends BaseDrawerActivity {
         }
 
         return false;
-    }
-
-    @OnClick(R.id.btn_log_out)
-    public void setBtnLogOut() {
-        auth.signOut();
-
-        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        Paper.book().delete(Constants.CURR_USER_KEY);
-        startActivity(intent);
-        finish();
     }
 
 }

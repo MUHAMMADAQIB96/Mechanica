@@ -17,6 +17,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <service android:name=".Java$MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.ActionBar" />
@@ -41,8 +47,14 @@
         <activity android:name=".UserRoleActivity" />
         <activity android:name=".UpdateProfileActivity" />
         <activity android:name=".BaseDrawerActivity" />
-        <activity android:name=".AboutActivity"
-            android:theme="@style/AppTheme.ActionBar"/>
+        <activity
+            android:name=".AboutActivity"
+            android:theme="@style/AppTheme.ActionBar" />
+
+        <service
+            android:name=".MyService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
