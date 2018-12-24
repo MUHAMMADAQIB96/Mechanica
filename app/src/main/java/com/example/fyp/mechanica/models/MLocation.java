@@ -5,4 +5,5 @@ public class MLocation {
 
     public double latitude;
     public double longitude;
+    public String uid;
 }

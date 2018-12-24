@@ -6,20 +6,27 @@
     android:layout_height="match_parent"
     tools:context="com.example.fyp.mechanica.MainActivity">
 
+    <TextView
+        android:id="@+id/tv_switch_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_normal"
+        android:text="Availability"/>
+
+    <Switch
+        android:id="@+id/sw"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/spacing_normal"
+        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_centerInParent="true"
         android:gravity="center">
-
-        <TextView
-            android:id="@+id/tv_username"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/blue"
-            android:textSize="@dimen/font_large"
-            android:text="username"/>
 
         <Button
             android:id="@+id/btn_map"

@@ -4,11 +4,9 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -17,20 +15,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fyp.mechanica.helpers.Constants;
+import com.example.fyp.mechanica.models.Job;
 import com.example.fyp.mechanica.models.MLocation;
 import com.example.fyp.mechanica.models.User;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApi;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
-import com.google.android.gms.location.places.PlaceDetectionApi;
-import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -39,13 +36,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Map;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -67,7 +66,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
     private boolean isPermGranted = false;
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-//    private GoogleApiClient mGoogleApiClient;
+    //    private GoogleApiClient mGoogleApiClient;
 //    private LocationRequest mLocationRequest;
     private double currentLatitude;
     private double currentLongitude;
@@ -81,6 +80,8 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
     Location mLastLocation;
     Marker mCurrLocationMarker;
 
+    MLocation mLocation;
+
     AlertDialog dialog;
 
     @Override
@@ -93,7 +94,6 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
         currUser = Paper.book().read(Constants.CURR_USER_KEY);
 
         MapActivityPermissionsDispatcher.showMapWithPermissionCheck(this);
-
 //        mGoogleApiClient = new GoogleApiClient.Builder(this)
 //                // The next two lines tell the new client that “this” current class will handle connection stuff
 //                .addConnectionCallbacks(this)
@@ -133,8 +133,8 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 
                 }
             });
-        }
 
+        }
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10 * 1000);
@@ -142,6 +142,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
     }
+
 //    private void initMap() {
 //        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 //        if (mapFragment != null) {
@@ -215,6 +216,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+
     }
 //
 //    @Override
@@ -234,34 +236,102 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 //        }
 //    }
 
-    @OnClick(R.id.btn_request)
-    public void setBtnRequest() {
-        final AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
-//        View mView = getLayoutInflater().inflate(R.layout.habit_done, null);
-//        mBuilder.setView(mView);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (currUser.userRole.equals("Customer")) {
+            btnRequest.setVisibility(View.VISIBLE);
 
-        mBuilder.setTitle("Send Request");
-        mBuilder.setMessage("Send Request to the Nearest Mechanics");
-        mBuilder.setPositiveButton("Send", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+        } else {
+            btnRequest.setVisibility(View.GONE);
 
-                Toast.makeText(MapActivity.this, "Your request has been sent", Toast.LENGTH_SHORT).show();
-            }
-        });
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            final View view = getLayoutInflater().inflate(R.layout.dialog_request, null);
+            TextView tvUserName = view.findViewById(R.id.tv_username);
+            TextView tvMsg = view.findViewById(R.id.tv_msg);
 
-        mBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialog.dismiss();
-            }
-        });
+            builder.setView(view);
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Job job = new Job();
+                    job.customerLat = mLocation.latitude;
+                    job.customerLng = mLocation.longitude;
+                    job.customerUID = mLocation.uid;
+                    job.mechanicUID = currUser.id;
 
-        dialog = mBuilder.create();
-        dialog.show();
+                    Date date = new Date();
+                    job.startAt = date.getTime();
+
+                    dbRef.child("jobs").child(currUser.id).setValue(job);
+                    dbRef.child("request").removeValue();
+                }
+            });
+
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                }
+            });
+
+            final AlertDialog dialog = builder.create();
+
+            dbRef.child("lives").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        String id = snapshot.getKey();
+                        if (currUser.id.equals(id)) {
+
+                            dbRef.child("request").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    mLocation = dataSnapshot.getValue(MLocation.class);
+                                    if (mLocation != null) {
+
+                                        if (mLocation.uid == null) {
+                                            dialog.dismiss();
+
+                                        } else {
+                                            dbRef.child("users").child(mLocation.uid).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    User user = dataSnapshot.getValue(User.class);
+                                                    ((TextView) view.findViewById(R.id.tv_username)).setText(user.name);
+                                                    ((TextView) view.findViewById(R.id.tv_msg)).setText(user.name + " send you a job request, do you want to accept it?");
+
+                                                    dialog.show();
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                        }
+
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+        }
 
     }
-
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -271,8 +341,9 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
 
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -312,15 +383,12 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
             }
         }
 
-
     }
-
 
     @Override
     public void onConnectionSuspended(int i) {
 
     }
-
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -349,6 +417,59 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
                  */
             Log.e("Error", "Location services connection failed with code " + connectionResult.getErrorCode());
         }
+    }
+
+
+    @OnClick(R.id.btn_request)
+    public void setBtnRequest() {
+        final AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
+
+        mBuilder.setTitle("Send Request");
+        mBuilder.setMessage("Send Request to the Nearest Mechanics");
+
+        mBuilder.setPositiveButton("Send", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapActivity.this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+
+                Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                if (location == null) {
+                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, MapActivity.this);
+
+                } else {
+                    MLocation mLocation = new MLocation();
+
+                    mLocation.longitude = location.getLongitude();
+                    mLocation.latitude = location.getLatitude();
+                    mLocation.uid = currUser.id;
+
+                    dbRef.child("request").setValue(mLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toast.makeText(MapActivity.this, "Your request has been sent", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+                }
+            }
+        });
+
+        mBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog = mBuilder.create();
+        dialog.show();
+
     }
 
 
@@ -390,7 +511,6 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
         mGoogleApiClient.connect();
     }
 
-
     @Override
     public void onLocationChanged(Location location) {
         currentLatitude = location.getLatitude();
@@ -423,7 +543,6 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
 //        //Place current location marker
 //
     }
-
 
     @Override
     public boolean onMyLocationButtonClick() {

@@ -3,9 +3,12 @@ package com.example.fyp.mechanica;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +18,11 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
@@ -28,10 +36,13 @@ public class MainActivity extends BaseDrawerActivity {
 
     public static final int ERROR_DIALOG_REQUEST = 9001;
 
-    @BindView(R.id.tv_username)
-    TextView tvUsername;
+    @BindView(R.id.tv_switch_label) TextView tvSwitchLabel;
+    @BindView(R.id.sw) Switch aSwitch;
+
     Button btnMap;
     FirebaseAuth auth;
+    DatabaseReference dbRef;
+    User currUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,15 +54,39 @@ public class MainActivity extends BaseDrawerActivity {
 
         auth = FirebaseAuth.getInstance();
 
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null) {
-            tvUsername.setText(user.getPhoneNumber());
-        }
+        dbRef = FirebaseDatabase.getInstance().getReference();
 
+        currUser = Paper.book().read(Constants.CURR_USER_KEY);
+
+        FirebaseUser user = auth.getCurrentUser();
         if (isServiceOk()) {
             init();
         }
 
+        dbRef.child("lives").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String id = snapshot.getKey();
+
+                    if (currUser.id.equals(id)) {
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                aSwitch.setChecked(true);
+
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
@@ -59,18 +94,21 @@ public class MainActivity extends BaseDrawerActivity {
     protected void onStart() {
         super.onStart();
 
-        User currUser = Paper.book().read(Constants.CURR_USER_KEY);
         if (currUser != null) {
             if (currUser.userRole.equals("Customer")) {
                 btnMap.setText("See Nearest Mechanics");
-
+                aSwitch.setVisibility(View.GONE);
+                tvSwitchLabel.setVisibility(View.GONE);
                 if (currUser.vehicle == null) {
                     startActivity(new Intent(this, UpdateProfileActivity.class));
                 }
 
             } else {
                 btnMap.setText("My Location");
+                aSwitch.setVisibility(View.VISIBLE);
+                tvSwitchLabel.setVisibility(View.VISIBLE);
             }
+
 
         } else {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
@@ -106,4 +144,11 @@ public class MainActivity extends BaseDrawerActivity {
         return false;
     }
 
+
+    @OnClick(R.id.sw)
+    public void setSwitch() {
+        if (!aSwitch.isChecked()) {
+            dbRef.child("lives").child(currUser.id).removeValue();
+        }
+    }
 }
