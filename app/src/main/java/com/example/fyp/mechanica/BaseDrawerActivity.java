@@ -148,13 +148,21 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
         item.setChecked(true);
 
         switch (item.getItemId()) {
-            case R.id.menu_drawer_item_update:
-                startActivity(new Intent(this, UpdateProfileActivity.class));
+            case R.id.menu_drawer_item_history:
+                startActivity(new Intent(this, HistoryActivity.class));
                 break;
 
-            case R.id.menu_drawer_item_about:
-                startActivity(new Intent(this, AboutActivity.class));
+            case R.id.menu_drawer_item_vehicle_detail:
+                startActivity(new Intent(this, VehicleDetailActivity.class));
                 break;
+
+            case R.id.menu_drawer_item_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+//
+//            case R.id.menu_drawer_item_about:
+//                startActivity(new Intent(this, AboutActivity.class));
+//                break;
 
             case R.id.menu_drawer_item_sign_out:
                 FirebaseAuth.getInstance().signOut();

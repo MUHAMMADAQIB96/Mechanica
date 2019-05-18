@@ -4,18 +4,33 @@
     <group android:checkableBehavior="single">
 
         <item
-            android:id="@+id/menu_drawer_item_update"
-            android:title="Profile"
-            android:icon="@drawable/ic_person_24dp"/>
-
-        <item android:id="@+id/menu_drawer_item_about"
-            android:title="About"
-            android:icon="@drawable/ic_new_releases_24dp" />
+            android:id="@+id/menu_drawer_item_history"
+            android:title="History"
+            android:icon="@drawable/ic_history_24dp"/>
 
         <item
-            android:id="@+id/menu_drawer_item_feedback"
-            android:title="Feedback"
-            android:icon="@drawable/ic_reply_24dp"/>
+            android:id="@+id/menu_drawer_item_vehicle_detail"
+            android:title="Vehicle Detial"
+            android:icon="@drawable/ic_directions_car_24dp"/>
+
+        <item
+            android:id="@+id/menu_drawer_item_settings"
+            android:title="Settings"
+            android:icon="@drawable/ic_settings_24dp"/>
+
+        <!--<item-->
+            <!--android:id="@+id/menu_drawer_item_update"-->
+            <!--android:title="Profile"-->
+            <!--android:icon="@drawable/ic_person_24dp"/>-->
+
+        <!--<item android:id="@+id/menu_drawer_item_about"-->
+            <!--android:title="About"-->
+            <!--android:icon="@drawable/ic_new_releases_24dp" />-->
+
+        <!--<item-->
+            <!--android:id="@+id/menu_drawer_item_feedback"-->
+            <!--android:title="Feedback"-->
+            <!--android:icon="@drawable/ic_reply_24dp"/>-->
 
         <item
             android:id="@+id/menu_drawer_item_sign_out"

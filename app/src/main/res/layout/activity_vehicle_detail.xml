@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center"
+    tools:context=".VehicleDetailActivity">
+
+
+    <EditText
+        android:id="@+id/et_vehicle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/edit_text_border"
+        android:padding="@dimen/spacing_small"
+        android:layout_margin="@dimen/spacing_ex_small"
+        android:hint="VEHICLE"/>
+
+    <EditText
+        android:id="@+id/et_vehicle_registration_no"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/edit_text_border"
+        android:padding="@dimen/spacing_small"
+        android:layout_margin="@dimen/spacing_ex_small"
+        android:inputType="textEmailAddress"
+        android:hint="REGISTRATION NO."/>
+
+    <EditText
+        android:id="@+id/et_vehicle_color"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/edit_text_border"
+        android:padding="@dimen/spacing_small"
+        android:layout_margin="@dimen/spacing_ex_small"
+        android:inputType="textEmailAddress"
+        android:hint="COLOR"/>
+
+    <EditText
+        android:id="@+id/et_vehicle_model"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/edit_text_border"
+        android:padding="@dimen/spacing_small"
+        android:layout_margin="@dimen/spacing_ex_small"
+        android:inputType="textEmailAddress"
+        android:hint="VEHICLE MODEL"/>
+
+    <Button
+        android:id="@+id/btn_submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_text_submit"
+        android:textColor="@color/white"
+        android:layout_marginHorizontal="@dimen/spacing_small"
+        android:layout_marginVertical="@dimen/spacing_normal"
+        android:background="@drawable/button_corner_radius"/>
+
+</LinearLayout>

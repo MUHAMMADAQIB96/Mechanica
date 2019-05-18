@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/spacing_normal">
+
+    <TextView
+        android:id="@+id/tv_date_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:text="27 Jan, 10:21 AM"/>
+
+    <TextView
+        android:id="@+id/tv_pkr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:textColor="@color/black"
+        android:text="PKR 800"/>
+
+    <LinearLayout
+        android:layout_below="@id/tv_date_time"
+        android:id="@+id/ll_user_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_small">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/civ_user_photo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:src="@drawable/avatar"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="Zafar Ali"/>
+
+            <RatingBar
+                android:id="@+id/rating_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                style="@style/Widget.AppCompat.RatingBar.Small"
+                android:rating="4"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_location"
+        android:layout_below="@id/ll_user_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=" Near 13th Lane- DHA Phase 7 Phase 2 Commercial..."
+        android:drawableStart="@drawable/ic_my_location_24dp"/>
+
+</RelativeLayout>

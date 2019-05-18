@@ -68,13 +68,12 @@
 
                 <RatingBar
                     android:id="@+id/rating_bar"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     style="@style/Widget.AppCompat.RatingBar.Small"
-                    android:numStars="5"
                     android:rating="4"
-                    android:stepSize="1.0"/>
+                    />
 
                 <TextView
                     android:id="@+id/tv_address"
