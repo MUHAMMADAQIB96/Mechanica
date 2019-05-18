@@ -61,7 +61,7 @@ dependencies {
     annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:3.0.0"
 
     /********************Paperdb***********************/
-    compile 'io.paperdb:paperdb:2.6'
+    implementation 'io.paperdb:paperdb:2.6'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -11,4 +11,6 @@
     <color name="black_opacity">#44000000</color>
 
     <color name="gray">#7F7F7F</color>
+
+    <color name="light_gary_line">#eee</color>
 </resources>
