@@ -7,6 +7,16 @@
     android:orientation="vertical"
     tools:context="com.example.fyp.mechanica.MapActivity">
 
+    <TextView
+        android:id="@+id/tv_finding_mechanic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_small"
+        android:background="@color/white"
+        android:visibility="gone"
+        android:text="Finding you a nearby Mechanic..."
+        />
+
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -14,14 +24,46 @@
         android:id="@+id/map"
         class="com.google.android.gms.maps.SupportMapFragment">
 
-        <Button
-            android:id="@+id/btn_request"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/spacing_small"
-            android:text="Request"
-            android:textColor="@color/white"
-            android:background="@color/black_opacity"/>
+        <!--<FrameLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="@dimen/spacing_normal"-->
+            <!--android:foregroundGravity="bottom"-->
+            <!--&gt;-->
+
+            <!--<include layout="@layout/mechanic_info_card" />-->
+
+        <!--</FrameLayout>-->
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            >
+
+            <Button
+                android:id="@+id/btn_confirm_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_small"
+                android:text="Confirm Location"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/blue"/>
+
+            <Button
+                android:id="@+id/btn_request"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_small"
+                android:text="Request Mechanic"
+                android:visibility="gone"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/blue"/>
+
+        </LinearLayout>
 
     </fragment>
 

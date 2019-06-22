@@ -144,7 +144,6 @@ public class MainActivity extends BaseDrawerActivity {
         return false;
     }
 
-
     @OnClick(R.id.sw)
     public void setSwitch() {
         if (!aSwitch.isChecked()) {

@@ -40,11 +40,11 @@ public class UpdateProfileActivity extends AppCompatActivity {
         dbRef = FirebaseDatabase.getInstance().getReference();
 
 
-        if (currUser.vehicle != null) {
-            etModel.setText(currUser.vehicle.model);
-            etMake.setText(currUser.vehicle.make);
-            etType.setText(currUser.vehicle.type);
-        }
+//        if (currUser.vehicle != null) {
+//            etModel.setText(currUser.vehicle.model);
+//            etMake.setText(currUser.vehicle.make);
+//            etType.setText(currUser.vehicle.type);
+//        }
     }
 
     @OnClick(R.id.btn_submit)
@@ -79,20 +79,20 @@ public class UpdateProfileActivity extends AppCompatActivity {
         if (!flag) {
             return;
         }
-
-        final Vehicle vehicle = new Vehicle();
-        vehicle.make = etMake.getText().toString();
-        vehicle.model = etModel.getText().toString();
-        vehicle.type = etType.getText().toString();
-
-        dbRef.child("users").child(currUser.id).child("vehicle").setValue(vehicle)
-                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                currUser.vehicle = vehicle;
-                Paper.book().write(Constants.CURR_USER_KEY, currUser);
-                startActivity(new Intent(UpdateProfileActivity.this, MainActivity.class));
-            }
-        });
+//
+//        final Vehicle vehicle = new Vehicle();
+//        vehicle.make = etMake.getText().toString();
+//        vehicle.model = etModel.getText().toString();
+//        vehicle.type = etType.getText().toString();
+//
+//        dbRef.child("users").child(currUser.id).child("vehicle").setValue(vehicle)
+//                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+//            @Override
+//            public void onComplete(@NonNull Task<Void> task) {
+//                currUser.vehicle = vehicle;
+//                Paper.book().write(Constants.CURR_USER_KEY, currUser);
+//                startActivity(new Intent(UpdateProfileActivity.this, MainActivity.class));
+//            }
+//        });
     }
 }

@@ -14,13 +14,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="3">
+            android:gravity="center_vertical"
+            android:weightSum="10">
 
             <TextView
                 android:id="@+id/tv_mile_away"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
+                android:layout_weight="8"
                 android:layout_margin="10dp"
                 android:text="Your Customer is 3 mintues away!"/>
 
@@ -28,11 +29,11 @@
                 android:id="@+id/tv_km"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:layout_margin="10dp"
                 android:textAlignment="textEnd"
                 android:textSize="@dimen/font_normal"
-                android:text="3KM"/>
+                android:text="3.5KM"/>
 
         </LinearLayout>
 
@@ -44,13 +45,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:layout_margin="15dp">
 
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_marginEnd="10dp"
-                android:layout_gravity="center_vertical"
                 android:src="@drawable/ic_place_black_24dp"/>
 
             <TextView
@@ -58,7 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/font_normal"
-                android:text="Near 13th Lane-DHA Phase 7 Phase 2 Commercial Area Defence Housing Society"/>
+                />
 
         </LinearLayout>
 

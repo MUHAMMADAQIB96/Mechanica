@@ -16,7 +16,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     @BindView(R.id.et_username) EditText etUsername;
     @BindView(R.id.et_email) EditText etEmail;
-//    @BindView(R.id.et_password) EditText etPassword;
     @BindView(R.id.et_phone_num) EditText etPhoneNumber;
 
     User user;

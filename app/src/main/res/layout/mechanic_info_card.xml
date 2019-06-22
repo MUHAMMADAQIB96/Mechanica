@@ -13,6 +13,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:weightSum="5">
 
             <TextView
@@ -44,7 +45,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp">
+            android:layout_margin="15dp">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/civ_mechanic_photo"
@@ -76,7 +77,7 @@
                     />
 
                 <TextView
-                    android:id="@+id/tv_address"
+                    android:id="@+id/tv_vehicle_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"

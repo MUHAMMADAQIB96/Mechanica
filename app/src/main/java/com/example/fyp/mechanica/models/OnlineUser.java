@@ -1,10 +1,6 @@
 package com.example.fyp.mechanica.models;
 
-
-public class MLocation {
-
+public class OnlineUser {
     public double latitude;
     public double longitude;
-    public String uid;
-    public double requestAt;
 }

@@ -1,9 +1,10 @@
 package com.example.fyp.mechanica;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -11,16 +12,18 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fyp.mechanica.helpers.Constants;
-import com.example.fyp.mechanica.models.Job;
+import com.example.fyp.mechanica.helpers.Helper;
+import com.example.fyp.mechanica.models.ActiveJob;
+import com.example.fyp.mechanica.models.Customer;
 import com.example.fyp.mechanica.models.MLocation;
 import com.example.fyp.mechanica.models.User;
 import com.google.android.gms.common.ConnectionResult;
@@ -37,34 +40,63 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.paperdb.Paper;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
 
 
 @RuntimePermissions
-public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.ConnectionCallbacks,
+public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
         OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener {
 
-    @BindView(R.id.btn_request) Button btnRequest;
-    @BindView(R.id.btn_confirm_location) Button btnConfirmLocation;
-    @BindView(R.id.tv_finding_mechanic) TextView textView;
+
+    @BindView(R.id.btn_accept_request)
+    Button btnAcceptRequest;
+    @BindView(R.id.btn_vehicle_detail)
+    Button btnVehicleDetail;
+
+    @BindView(R.id.btn_arrived_for_work)
+    Button btnArrivedForWork;
+    @BindView(R.id.btn_call_mechanic)
+    Button btnCallMechanic;
+
+    @BindView(R.id.ll_arrived_for_work)
+    LinearLayout llArrivedForWork;
+    @BindView(R.id.ll_request)
+    LinearLayout llAcceptRequest;
+
+    @BindView(R.id.tv_address)
+    TextView tvAddress;
+    @BindView(R.id.tv_mile_away)
+    TextView tvMileAway;
+    @BindView(R.id.tv_km)
+    TextView tvKM;
+
+    @BindView(R.id.civ_mechanic_photo)
+    CircleImageView civPhoto;
+    @BindView(R.id.tv_name)
+    TextView tvCustomerName;
+    @BindView(R.id.tv_vehicle_info)
+    TextView tvVehicleInfo;
+
 
     private boolean isPermGranted = false;
 
@@ -75,7 +107,8 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
     private double currentLongitude;
 
     DatabaseReference dbRef;
-    User currUser;
+    User currUser, customer;
+    String customerUID;
 
     GoogleMap mGoogleMap;
     LocationRequest mLocationRequest;
@@ -88,10 +121,13 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
     AlertDialog dialog;
     ActionBar bar;
 
+    ActiveJob activeJob = new ActiveJob();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
+        setContentView(R.layout.activity_mechanic_map);
         ButterKnife.bind(this);
 
         dbRef = FirebaseDatabase.getInstance().getReference();
@@ -99,56 +135,9 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
         bar = getSupportActionBar();
         if (bar != null)
-            bar.setTitle("Select Your Location");
+            bar.setTitle("Home");
 
-        MapActivityPermissionsDispatcher.showMapWithPermissionCheck(this);
-//        mGoogleApiClient = new GoogleApiClient.Builder(this)
-//                // The next two lines tell the new client that “this” current class will handle connection stuff
-//                .addConnectionCallbacks(this)
-//                .addOnConnectionFailedListener(this)
-//                //fourth line adds the LocationServices API endpoint from GooglePlayServices
-//                .addApi(LocationServices.API)
-//                .build();
-//
-//        // Create the LocationRequest object
-//        mLocationRequest = LocationRequest.create()
-//                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-//                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
-//                .setFastestInterval(1 * 1000); // 1 second, in milliseconds
-
-        if (currUser.userRole.equals("Customer")) {
-
-            dbRef.child("lives").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        MLocation location = snapshot.getValue(MLocation.class);
-
-
-                        if (location != null) {
-                            double distance = distance(location.latitude, location.longitude,
-                                    currentLatitude, currentLongitude);
-
-                            LatLng latLng = new LatLng(location.latitude, location.longitude);
-                            mGoogleMap.addMarker(new MarkerOptions().position(latLng)
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.mechanic_maker_48_ic))
-                                    .title(distance + " KM"));
-
-                            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(14));
-
-                        }
-
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-
-        }
+        MechanicMapActivityPermissionsDispatcher.showMapWithPermissionCheck(MechanicMapActivity.this);
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10 * 1000);
@@ -250,100 +239,52 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 //        }
 //    }
 
+    ValueEventListener requestEventListner = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            if (dataSnapshot.exists()) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    bar.setTitle("Job");
+                    customerUID = snapshot.getKey();
+                    getCustomerData(snapshot.getKey());
+                    MLocation mLocation = snapshot.getValue(MLocation.class);
+                    if (mLocation != null) {
+
+                        Customer customer = new Customer();
+                        customer.id = snapshot.getKey();
+                        customer.lat = mLocation.latitude;
+                        customer.lng = mLocation.longitude;
+
+                        Paper.book().write(Constants.CUSTOMER_KEY, customer);
+
+                        getAddress(mLocation.latitude, mLocation.longitude);
+                        double distance = distance(currentLatitude, currentLongitude,
+                                mLocation.latitude, mLocation.longitude);
+
+                        Log.d("IRFAN", String.valueOf(Helper.getDurationOfDistance(distance)));
+
+                        tvKM.setText(distance + "KM");
+                        tvMileAway.setText("Your customer is " + Helper.getDurationOfDistance(distance) + " minutes away");
+
+                    }
+
+                }
+
+            } else {
+                llAcceptRequest.setVisibility(View.GONE);
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
     @Override
     protected void onStart() {
         super.onStart();
-//        if (currUser.userRole.equals("Customer")) {
-//            btnRequest.setVisibility(View.VISIBLE);
-//
-//        } else {
-//            btnRequest.setVisibility(View.GONE);
-//
-//            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//            final View view = getLayoutInflater().inflate(R.layout.dialog_request, null);
-//            TextView tvUserName = view.findViewById(R.id.tv_username);
-//            TextView tvMsg = view.findViewById(R.id.tv_msg);
-//
-//            builder.setView(view);
-//            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface dialogInterface, int i) {
-//                    Job job = new Job();
-//                    job.customerLat = mLocation.latitude;
-//                    job.customerLng = mLocation.longitude;
-//                    job.customerUID = mLocation.uid;
-//                    job.mechanicUID = currUser.id;
-//
-//                    Date date = new Date();
-//                    job.startAt = date.getTime();
-//
-//                    dbRef.child("jobs").child(currUser.id).setValue(job);
-//                    dbRef.child("request").removeValue();
-//                }
-//            });
-//
-//            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface dialogInterface, int i) {
-//
-//                }
-//            });
-//
-//            final AlertDialog dialog = builder.create();
-//
-//            dbRef.child("lives").addListenerForSingleValueEvent(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                        String id = snapshot.getKey();
-//                        if (currUser.id.equals(id)) {
-//
-//                            dbRef.child("request").addValueEventListener(new ValueEventListener() {
-//                                @Override
-//                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                                    mLocation = dataSnapshot.getValue(MLocation.class);
-//                                    if (mLocation != null) {
-//
-//                                        if (mLocation.uid == null) {
-//                                            dialog.dismiss();
-//
-//                                        } else {
-//                                            dbRef.child("users").child(mLocation.uid).addListenerForSingleValueEvent(new ValueEventListener() {
-//                                                @Override
-//                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                                                    User user = dataSnapshot.getValue(User.class);
-//                                                    ((TextView) view.findViewById(R.id.tv_username)).setText(user.name);
-//                                                    ((TextView) view.findViewById(R.id.tv_msg)).setText(user.name + " send you a job request, do you want to accept it?");
-//
-//                                                    dialog.show();
-//                                                }
-//
-//                                                @Override
-//                                                public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                                                }
-//                                            });
-//                                        }
-//
-//                                    }
-//                                }
-//
-//                                @Override
-//                                public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                                }
-//                            });
-//                        }
-//                    }
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                }
-//            });
-//
-//        }
+        dbRef.child("requests").addValueEventListener(requestEventListner);
 
     }
 
@@ -372,7 +313,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
         if (location == null) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest,
-                    MapActivity.this);
+                    MechanicMapActivity.this);
 
         } else {
             if (currUser.userRole.equals("Mechanic")) {
@@ -408,84 +349,31 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-         /*
-             * Google Play services can resolve some errors it detects.
-             * If the error has a resolution, try sending an Intent to
-             * start a Google Play services activity that can resolve
-             * error.
-             */
+        /*
+         * Google Play services can resolve some errors it detects.
+         * If the error has a resolution, try sending an Intent to
+         * start a Google Play services activity that can resolve
+         * error.
+         */
         if (connectionResult.hasResolution()) {
             try {
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
-                    /*
-                     * Thrown if Google Play services canceled the original
-                     * PendingIntent
-                     */
+                /*
+                 * Thrown if Google Play services canceled the original
+                 * PendingIntent
+                 */
             } catch (IntentSender.SendIntentException e) {
                 // Log the error
                 e.printStackTrace();
             }
         } else {
-                /*
-                 * If no resolution is available, display a dialog to the
-                 * user with the error.
-                 */
+            /*
+             * If no resolution is available, display a dialog to the
+             * user with the error.
+             */
             Log.e("Error", "Location services connection failed with code " + connectionResult.getErrorCode());
         }
-    }
-
-
-//    @OnClick(R.id.btn_request)
-    public void setBtnRequest() {
-        final AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
-
-        mBuilder.setTitle("Send Request");
-        mBuilder.setMessage("Send Request to the Nearest Mechanics");
-
-        mBuilder.setPositiveButton("Send", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-                if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapActivity.this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
-
-                Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                if (location == null) {
-                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, MapActivity.this);
-
-                } else {
-                    MLocation mLocation = new MLocation();
-
-                    mLocation.longitude = location.getLongitude();
-                    mLocation.latitude = location.getLatitude();
-                    mLocation.uid = currUser.id;
-
-                    dbRef.child("request").setValue(mLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Toast.makeText(MapActivity.this, "Your request has been sent", Toast.LENGTH_SHORT).show();
-
-                        }
-                    });
-
-                }
-            }
-        });
-
-        mBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialog.dismiss();
-            }
-        });
-
-        dialog = mBuilder.create();
-        dialog.show();
-
     }
 
 
@@ -509,8 +397,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
             } else {
                 //Request Location Permission
             }
-        }
-        else {
+        } else {
             buildGoogleApiClient();
             mGoogleMap.setMyLocationEnabled(true);
         }
@@ -526,6 +413,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
                 .build();
         mGoogleApiClient.connect();
     }
+
 
     @Override
     public void onLocationChanged(Location location) {
@@ -560,6 +448,132 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 //
     }
 
+
+    @OnClick(R.id.btn_accept_request)
+    public void setBtnAcceptRequest() {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+        if (location == null) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest,
+                    MechanicMapActivity.this);
+
+        } else {
+            ActiveJob activeJob = new ActiveJob();
+            activeJob.mechanicID = currUser.id;
+            activeJob.mechLat = location.getLatitude();
+            activeJob.mechLon = location.getLongitude();
+            activeJob.startedAt = (new Date()).getTime();
+
+            Customer customer = Paper.book().read(Constants.CUSTOMER_KEY);
+            activeJob.customerID = customer.id;
+            activeJob.cusLon = customer.lng;
+            activeJob.cusLat = customer.lat;
+
+            dbRef.child("activeJobs").push().setValue(activeJob);
+        }
+
+        dbRef.child("requests").child(customer.id).removeValue();
+        dbRef.child("requests").removeEventListener(requestEventListner);
+
+        llAcceptRequest.setVisibility(View.GONE);
+        llArrivedForWork.setVisibility(View.VISIBLE);
+        getActiveJobInfo();
+
+    }
+
+
+    @OnClick(R.id.btn_vehicle_detail)
+    public void setBtnVehicleDetail() {
+
+        AlertDialog builder = new AlertDialog.Builder(this).create();
+
+        View view = View.inflate(this, R.layout.vehicle_info_dialog, null);
+        TextView vehicle = view.findViewById(R.id.tv_vehicle);
+        TextView registrationNo = view.findViewById(R.id.tv_registration_no);
+        TextView tvColor = view.findViewById(R.id.tv_color);
+        TextView tvModel = view.findViewById(R.id.tv_model);
+
+        builder.setView(view);
+
+        builder.show();
+
+        if (customer != null) {
+           vehicle.setText(customer.vehicle.type);
+           registrationNo.setText(customer.vehicle.registrationNo);
+           tvColor.setText(customer.vehicle.color);
+           tvModel.setText(customer.vehicle.model);
+        }
+    }
+
+    @OnClick (R.id.btn_arrived_for_work)
+    public void setBtnArrivedForWork() {
+
+    }
+
+    @OnClick(R.id.btn_call_mechanic)
+    public void setBtnCallMechanic() {
+
+    }
+
+    public void getActiveJobInfo() {
+        dbRef.child("activeJobs").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists())
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ActiveJob job = snapshot.getValue(ActiveJob.class);
+                        if (job != null && currUser.id.equals(job.mechanicID)) {
+                            getCustomerData(job.customerID);
+                            tvCustomerName.setText(customer.name);
+                            tvVehicleInfo.setText(customer.vehicle.type + " | " + customer.vehicle.registrationNo);
+                        }
+                    }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    public void getCustomerData(String uid) {
+        dbRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    User user = dataSnapshot.getValue(User.class);
+                    if (user != null) {
+                        customer = user;
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+
     @Override
     public boolean onMyLocationButtonClick() {
 
@@ -576,51 +590,6 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
         return false;
     }
-
-    @OnClick(R.id.btn_confirm_location)
-    public void confirmLocation() {
-        btnRequest.setVisibility(View.VISIBLE);
-        btnConfirmLocation.setVisibility(View.GONE);
-
-        bar.setTitle("Request Mechanic");
-    }
-
-    @OnClick(R.id.btn_request)
-    public void requestMechanic() {
-        textView.setVisibility(View.VISIBLE);
-        btnRequest.setVisibility(View.GONE);
-
-        if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapActivity.this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (location == null) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest,
-                    MapActivity.this);
-
-        } else {
-            MLocation mLocation = new MLocation();
-
-            mLocation.longitude = location.getLongitude();
-            mLocation.latitude = location.getLatitude();
-//            mLocation.uid = currUser.id;
-            mLocation.requestAt = (new Date()).getTime();
-
-            dbRef.child("requests").child(currUser.id).setValue(mLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    Toast.makeText(MapActivity.this, "Your request has been sent",
-                            Toast.LENGTH_SHORT).show();
-
-                }
-            });
-
-        }
-    }
-
 
     private double distance(double lat1, double lon1, double lat2, double lon2) {
         double theta = lon1 - lon2;
@@ -650,4 +619,34 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
         return Math.round(km * 10) / 10.0;
     }
+
+    public void getAddress(double lat, double lng) {
+        Geocoder geocoder = new Geocoder(MechanicMapActivity.this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+            Address obj = addresses.get(0);
+            String add = obj.getAddressLine(0);
+            tvAddress.setText(add);
+
+//            add = add + "\n" + obj.getCountryName();
+//            add = add + "\n" + obj.getCountryCode();
+//            add = add + "\n" + obj.getAdminArea();
+//            add = add + "\n" + obj.getPostalCode();
+//            add = add + "\n" + obj.getSubAdminArea();
+//            add = add + "\n" + obj.getLocality();
+//            add = add + "\n" + obj.getSubThoroughfare();
+
+            Log.v("IGA", "Address" + add);
+            // Toast.makeText(this, "Address=>" + add,
+            // Toast.LENGTH_SHORT).show();
+
+            // TennisAppActivity.showDialog(add);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
 }

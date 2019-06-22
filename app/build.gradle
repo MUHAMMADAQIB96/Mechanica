@@ -62,6 +62,9 @@ dependencies {
 
     /********************Paperdb***********************/
     implementation 'io.paperdb:paperdb:2.6'
+
+    /*?******************Google Map Direction************************/
+    implementation 'com.github.jd-alexander:library:1.1.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

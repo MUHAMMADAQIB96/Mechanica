@@ -17,15 +17,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".HistoryActivity"></activity>
+        <activity android:name=".MechanicMapActivity"
+            android:theme="@style/AppTheme.ActionBar"></activity>
+        <activity android:name=".HistoryActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".VehicleDetailActivity" />
         <activity android:name=".RequestMechanicActivity" />
         <activity android:name=".SelectLocationActivity" />
         <activity android:name=".RateYourCustomerActivity" />
-        <activity android:name=".JobActivity">
-
-        </activity>
+        <activity android:name=".JobActivity"></activity>
         <activity android:name=".HomeActivity" />
         <activity
             android:name=".MainActivity"
@@ -39,7 +39,9 @@
         </activity>
         <activity android:name=".LoginActivity" />
         <activity android:name=".SignupActivity" />
-        <activity android:name=".MapActivity" />
+        <activity
+            android:name=".MapActivity"
+            android:theme="@style/AppTheme.ActionBar" />
 
         <meta-data
             android:name="com.google.android.gms.version"

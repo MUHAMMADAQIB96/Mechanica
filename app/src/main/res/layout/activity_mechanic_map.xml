@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.fyp.mechanica.MechanicMapActivity">
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/map"
+        class="com.google.android.gms.maps.SupportMapFragment">
+
+        <LinearLayout
+            android:id="@+id/ll_request"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/spacing_normal"
+            android:orientation="vertical"
+            android:gravity="bottom">
+
+            <include layout="@layout/customer_address_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/btn_accept_request"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/blue"
+                    android:textColor="@color/white"
+                    android:text="Accept Request"/>
+
+                <Button
+                    android:id="@+id/btn_vehicle_detail"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/blue"
+                    android:textColor="@color/white"
+                    android:text="Vehicle Details"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/ll_arrived_for_work"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/spacing_normal"
+            android:orientation="vertical"
+            android:gravity="bottom">
+
+            <include layout="@layout/mechanic_info_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/btn_arrived_for_work"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/blue"
+                    android:textColor="@color/white"
+                    android:text="Arrived For Work"/>
+
+                <Button
+                    android:id="@+id/btn_call_mechanic"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/blue"
+                    android:textColor="@color/white"
+                    android:text="Call Mechanic"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+
+    </fragment>
+
+</LinearLayout>
+
+
