@@ -2,6 +2,7 @@ package com.example.fyp.mechanica;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -11,16 +12,17 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fyp.mechanica.helpers.Constants;
-import com.example.fyp.mechanica.models.Job;
+import com.example.fyp.mechanica.helpers.Helper;
+import com.example.fyp.mechanica.models.ActiveJob;
 import com.example.fyp.mechanica.models.MLocation;
 import com.example.fyp.mechanica.models.User;
 import com.google.android.gms.common.ConnectionResult;
@@ -62,9 +64,22 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
         OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener {
 
+    @BindView(R.id.ll_request) LinearLayout llRequest;
+
     @BindView(R.id.btn_request) Button btnRequest;
     @BindView(R.id.btn_confirm_location) Button btnConfirmLocation;
     @BindView(R.id.tv_finding_mechanic) TextView textView;
+
+    @BindView(R.id.ll_mechanic_card) LinearLayout llMechanicCard;
+    @BindView(R.id.tv_cust_km) TextView tvKMAway;
+    @BindView(R.id.tv_cust_min_away) TextView tvMinAway;
+    @BindView(R.id.tv_name) TextView tvName;
+    @BindView(R.id.tv_profession) TextView tvProfession;
+
+    @BindView(R.id.ll_mechanic_arrived_action_btns) LinearLayout llMechanicArrivedActionBtns;
+    @BindView(R.id.btn_call_mechanic) Button btnCallMechanic;
+    @BindView(R.id.btn_confirm_mechanic_request) Button btnConfirmMechanicRequest;
+    @BindView(R.id.btn_call_mech) Button btnCallMech;
 
     private boolean isPermGranted = false;
 
@@ -253,6 +268,8 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
     @Override
     protected void onStart() {
         super.onStart();
+        checkRequestsResponse();
+        getJobStatus();
 //        if (currUser.userRole.equals("Customer")) {
 //            btnRequest.setVisibility(View.VISIBLE);
 //
@@ -527,6 +544,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
         mGoogleApiClient.connect();
     }
 
+
     @Override
     public void onLocationChanged(Location location) {
         currentLatitude = location.getLatitude();
@@ -560,6 +578,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 //
     }
 
+
     @Override
     public boolean onMyLocationButtonClick() {
 
@@ -577,6 +596,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
         return false;
     }
 
+
     @OnClick(R.id.btn_confirm_location)
     public void confirmLocation() {
         btnRequest.setVisibility(View.VISIBLE);
@@ -584,6 +604,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
         bar.setTitle("Request Mechanic");
     }
+
 
     @OnClick(R.id.btn_request)
     public void requestMechanic() {
@@ -619,6 +640,133 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
             });
 
         }
+    }
+
+
+    public void checkRequestsResponse() {
+        dbRef.child("activeJobs").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists())
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ActiveJob job = snapshot.getValue(ActiveJob.class);
+                        if (job != null && job.customerID.equals(currUser.id)) {
+
+                            llRequest.setVisibility(View.GONE);
+                            llMechanicCard.setVisibility(View.VISIBLE);
+
+                            double distance = distance(job.cusLat, job.cusLon, job.mechLat, job.mechLon);
+                            int time = Helper.getDurationOfDistance(distance);
+                            getMechanicInfo(job.mechanicID);
+                            tvMinAway.setText("Your Mechanic is " + time + " minutes away");
+                            tvKMAway.setText(distance + " KM");
+
+                        }
+                    }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    public void getJobStatus() {
+        dbRef.child("activeJobs").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ActiveJob job = snapshot.getValue(ActiveJob.class);
+                        if (job != null && job.customerID.equals(currUser.id)) {
+//                            String jobId = snapshot.getKey();
+                            if (job.jobStatus == 1) {
+                                llMechanicArrivedActionBtns.setVisibility(View.VISIBLE);
+                                btnCallMech.setVisibility(View.GONE);
+                            }
+                            else if (job.jobStatus == 2) {
+                                startActivity(new Intent(MapActivity.this, JobStartedActivity.class));
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    public void getMechanicInfo(String uid) {
+        dbRef.child("users").child(uid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    User user = dataSnapshot.getValue(User.class);
+                    tvName.setText(user.name);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    @OnClick(R.id.btn_call_mech)
+    public void setBtnCallMech() {
+        callToMechanic();
+    }
+
+
+    @OnClick(R.id.btn_call_mechanic)
+    public void setBtnCallMechanic() {
+        callToMechanic();
+    }
+
+
+    public void callToMechanic() {
+
+    }
+
+
+    @OnClick(R.id.btn_confirm_mechanic_request)
+    public void setBtnConfirmMechanicRequest() {
+        dbRef.child("activeJobs")
+                .addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ActiveJob job = snapshot.getValue(ActiveJob.class);
+                        if (job!= null && job.customerID.equals(currUser.id)) {
+                            String jobId = snapshot.getKey();
+                            confirmJob(jobId);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        startActivity(new Intent(MapActivity.this, JobStartedActivity.class));
+
+
+    }
+
+
+    public void confirmJob(String jobId) {
+        dbRef.child("activeJobs").child(jobId).child("jobStatus").setValue(2);
     }
 
 

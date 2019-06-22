@@ -1,12 +1,14 @@
 package com.example.fyp.mechanica;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -68,41 +70,29 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
         GoogleMap.OnMyLocationButtonClickListener {
 
 
-    @BindView(R.id.btn_accept_request)
-    Button btnAcceptRequest;
-    @BindView(R.id.btn_vehicle_detail)
-    Button btnVehicleDetail;
+    @BindView(R.id.btn_accept_request) Button btnAcceptRequest;
+    @BindView(R.id.btn_vehicle_detail) Button btnVehicleDetail;
 
-    @BindView(R.id.btn_arrived_for_work)
-    Button btnArrivedForWork;
-    @BindView(R.id.btn_call_mechanic)
-    Button btnCallMechanic;
+    @BindView(R.id.btn_confirm_mechanic_request) Button btnArrivedForWork;
+    @BindView(R.id.btn_call_mechanic) Button btnCallMechanic;
 
-    @BindView(R.id.ll_arrived_for_work)
-    LinearLayout llArrivedForWork;
-    @BindView(R.id.ll_request)
-    LinearLayout llAcceptRequest;
+    @BindView(R.id.ll_arrived_for_work) LinearLayout llArrivedForWork;
+    @BindView(R.id.ll_request) LinearLayout llAcceptRequest;
 
-    @BindView(R.id.tv_address)
-    TextView tvAddress;
-    @BindView(R.id.tv_mile_away)
-    TextView tvMileAway;
-    @BindView(R.id.tv_km)
-    TextView tvKM;
+    @BindView(R.id.tv_address) TextView tvAddress;
+    @BindView(R.id.tv_mile_away) TextView tvMileAway;
+    @BindView(R.id.tv_km) TextView tvKM;
 
-    @BindView(R.id.civ_mechanic_photo)
-    CircleImageView civPhoto;
-    @BindView(R.id.tv_name)
-    TextView tvCustomerName;
-    @BindView(R.id.tv_vehicle_info)
-    TextView tvVehicleInfo;
+    @BindView(R.id.civ_user_photo) CircleImageView civPhoto;
+    @BindView(R.id.tv_name) TextView tvCustomerName;
+    @BindView(R.id.tv_vehicle_info) TextView tvVehicleInfo;
+    @BindView(R.id.tv_cust_min_away) TextView tvCustomerMinAway;
+    @BindView(R.id.tv_cust_km) TextView tvCustomerKM;
 
 
     private boolean isPermGranted = false;
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    //    private GoogleApiClient mGoogleApiClient;
-//    private LocationRequest mLocationRequest;
     private double currentLatitude;
     private double currentLongitude;
 
@@ -221,6 +211,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
         }
 
     }
+
 //
 //    @Override
 //    protected void onResume() {
@@ -239,7 +230,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
 //        }
 //    }
 
-    ValueEventListener requestEventListner = new ValueEventListener() {
+    ValueEventListener requestEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             if (dataSnapshot.exists()) {
@@ -261,7 +252,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
                         double distance = distance(currentLatitude, currentLongitude,
                                 mLocation.latitude, mLocation.longitude);
 
-                        Log.d("IRFAN", String.valueOf(Helper.getDurationOfDistance(distance)));
+                        llAcceptRequest.setVisibility(View.VISIBLE);
 
                         tvKM.setText(distance + "KM");
                         tvMileAway.setText("Your customer is " + Helper.getDurationOfDistance(distance) + " minutes away");
@@ -284,7 +275,10 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     @Override
     protected void onStart() {
         super.onStart();
-        dbRef.child("requests").addValueEventListener(requestEventListner);
+        dbRef.child("requests").addValueEventListener(requestEventListener);
+
+        getActiveJobInfo();
+
 
     }
 
@@ -487,11 +481,10 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
         }
 
         dbRef.child("requests").child(customer.id).removeValue();
-        dbRef.child("requests").removeEventListener(requestEventListner);
+        dbRef.child("requests").removeEventListener(requestEventListener);
 
         llAcceptRequest.setVisibility(View.GONE);
         llArrivedForWork.setVisibility(View.VISIBLE);
-        getActiveJobInfo();
 
     }
 
@@ -519,15 +512,38 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
         }
     }
 
-    @OnClick (R.id.btn_arrived_for_work)
-    public void setBtnArrivedForWork() {
 
+    @OnClick (R.id.btn_confirm_mechanic_request)
+    public void setBtnArrivedForWork() {
+        dbRef.child("activeJobs").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ActiveJob job = snapshot.getValue(ActiveJob.class);
+                        if (job != null  && job.mechanicID.equals(currUser.id)) {
+                            String jobId = snapshot.getKey();
+
+                            if (jobId != null)
+                            dbRef.child("activeJobs").child(jobId).child("jobStatus").setValue(1);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
+
 
     @OnClick(R.id.btn_call_mechanic)
     public void setBtnCallMechanic() {
 
     }
+
 
     public void getActiveJobInfo() {
         dbRef.child("activeJobs").addValueEventListener(new ValueEventListener() {
@@ -537,9 +553,17 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         ActiveJob job = snapshot.getValue(ActiveJob.class);
                         if (job != null && currUser.id.equals(job.mechanicID)) {
+
+                            llArrivedForWork.setVisibility(View.VISIBLE);
                             getCustomerData(job.customerID);
-                            tvCustomerName.setText(customer.name);
-                            tvVehicleInfo.setText(customer.vehicle.type + " | " + customer.vehicle.registrationNo);
+
+
+                            double distance = distance(job.cusLat, job.cusLon, job.mechLat, job.mechLon);
+
+                            tvCustomerKM.setText(distance + "KM");
+                            tvCustomerMinAway.setText("Your customer is " +
+                                    Helper.getDurationOfDistance(distance) + " minutes away");
+
                         }
                     }
             }
@@ -553,13 +577,16 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
 
 
     public void getCustomerData(String uid) {
-        dbRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+        dbRef.child("users").child(uid)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     User user = dataSnapshot.getValue(User.class);
                     if (user != null) {
                         customer = user;
+                        tvCustomerName.setText(user.name);
+                        tvVehicleInfo.setText(user.vehicle.type + " | " + user.vehicle.registrationNo);
 
                     }
                 }
@@ -571,6 +598,35 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
             }
         });
 
+    }
+
+
+    public void getJobStatus() {
+        dbRef.child("activeJobs").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ActiveJob job = snapshot.getValue(ActiveJob.class);
+                        if (job != null && job.mechanicID.equals(currUser.id)) {
+
+                            if (job.jobStatus == 2) {
+                                Intent intent = new Intent(MechanicMapActivity.this,
+                                        JobStartedActivity.class);
+                                intent.putExtra("JOB_ID", snapshot.getKey());
+                                intent.putExtra("JOB", (Parcelable) job);
+                                startActivity(intent);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5dp">
+
+    <TextView
+        android:text="00:00:00"
+        android:id="@+id/tvTimer"
+        android:textSize="40sp"
+        android:layout_marginTop="@dimen/spacing_huge"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
+    <Button
+        android:id="@+id/btn_done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:backgroundTint="@color/blue"
+        android:textColor="@color/white"
+        android:text="Job Done"/>
+
+    <LinearLayout
+        android:id="@+id/ll_rating_card"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:gravity="bottom"
+        android:padding="@dimen/spacing_normal"
+        android:orientation="vertical">
+
+        <include layout="@layout/customer_rate_card" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -24,20 +24,8 @@
         android:id="@+id/map"
         class="com.google.android.gms.maps.SupportMapFragment">
 
-        <!--<FrameLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_margin="@dimen/spacing_normal"-->
-            <!--android:foregroundGravity="bottom"-->
-            <!--&gt;-->
-
-            <!--<include layout="@layout/mechanic_info_card" />-->
-
-        <!--</FrameLayout>-->
-
-
-
         <LinearLayout
+            android:id="@+id/ll_request"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="bottom"
@@ -62,6 +50,56 @@
                 android:visibility="gone"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/blue"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_mechanic_card"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/spacing_normal"
+            android:orientation="vertical"
+            android:gravity="bottom">
+
+            <include layout="@layout/mechanic_info_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:id="@+id/ll_mechanic_arrived_action_btns"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/btn_confirm_mechanic_request"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/blue"
+                    android:textColor="@color/white"
+                    android:text="Confirm Request"/>
+
+                <Button
+                    android:id="@+id/btn_call_mechanic"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/blue"
+                    android:textColor="@color/white"
+                    android:text="Call Mechanic"/>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_call_mech"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/blue"
+                android:textColor="@color/white"
+                android:text="Call Mechanic"/>
 
         </LinearLayout>
 

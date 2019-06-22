@@ -17,15 +17,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MechanicMapActivity"
+        <activity android:name=".JobStartedActivity"
             android:theme="@style/AppTheme.ActionBar"></activity>
-        <activity android:name=".HistoryActivity" />
+        <activity
+            android:name=".MechanicMapActivity"
+            android:theme="@style/AppTheme.ActionBar" />
+        <activity android:name=".HistoryActivity"
+            android:theme="@style/AppTheme.ActionBar"/>
         <activity android:name=".SettingsActivity" />
         <activity android:name=".VehicleDetailActivity" />
         <activity android:name=".RequestMechanicActivity" />
         <activity android:name=".SelectLocationActivity" />
         <activity android:name=".RateYourCustomerActivity" />
-        <activity android:name=".JobActivity"></activity>
+        <activity android:name=".JobActivity" />
         <activity android:name=".HomeActivity" />
         <activity
             android:name=".MainActivity"
