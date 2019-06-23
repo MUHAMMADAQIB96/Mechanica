@@ -30,6 +30,7 @@ import com.example.fyp.mechanica.models.MLocation;
 import com.example.fyp.mechanica.models.User;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
@@ -42,6 +43,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -73,7 +75,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     @BindView(R.id.btn_accept_request) Button btnAcceptRequest;
     @BindView(R.id.btn_vehicle_detail) Button btnVehicleDetail;
 
-    @BindView(R.id.btn_confirm_mechanic_request) Button btnArrivedForWork;
+    @BindView(R.id.btn_arrived_for_work) Button btnArrivedForWork;
     @BindView(R.id.btn_call_mechanic) Button btnCallMechanic;
 
     @BindView(R.id.ll_arrived_for_work) LinearLayout llArrivedForWork;
@@ -106,12 +108,15 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     Location mLastLocation;
     Marker mCurrLocationMarker;
 
+    private FusedLocationProviderClient fusedLocationClient;
+
     MLocation mLocation;
 
     AlertDialog dialog;
     ActionBar bar;
 
     ActiveJob activeJob = new ActiveJob();
+    ValueEventListener jobRequestEventListener;
 
 
     @Override
@@ -128,6 +133,8 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
             bar.setTitle("Home");
 
         MechanicMapActivityPermissionsDispatcher.showMapWithPermissionCheck(MechanicMapActivity.this);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10 * 1000);
@@ -275,10 +282,60 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     @Override
     protected void onStart() {
         super.onStart();
-        dbRef.child("requests").addValueEventListener(requestEventListener);
+
+        jobRequestEventListener =  new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        bar.setTitle("Job");
+                        customerUID = snapshot.getKey();
+                        getCustomerData(snapshot.getKey());
+                        MLocation mLocation = snapshot.getValue(MLocation.class);
+                        if (mLocation != null) {
+
+                            Customer customer = new Customer();
+                            customer.id = snapshot.getKey();
+                            customer.lat = mLocation.latitude;
+                            customer.lng = mLocation.longitude;
+
+                            Paper.book().write(Constants.CUSTOMER_KEY, customer);
+
+                            getAddress(mLocation.latitude, mLocation.longitude);
+                            double distance = distance(currentLatitude, currentLongitude,
+                                    mLocation.latitude, mLocation.longitude);
+
+                            llAcceptRequest.setVisibility(View.VISIBLE);
+
+                            tvKM.setText(distance + "KM");
+                            tvMileAway.setText("Your customer is " + Helper.getDurationOfDistance(distance) + " minutes away");
+
+                        }
+
+                    }
+
+                } else {
+                    llAcceptRequest.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+
+        dbRef.child("requests").addValueEventListener(jobRequestEventListener);
 
         getActiveJobInfo();
+        getJobStatus();
 
+
+    }
+
+
+    public void removedJobRequestListener() {
+        dbRef.child("requests").removeEventListener(jobRequestEventListener);
 
     }
 
@@ -446,6 +503,8 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     @OnClick(R.id.btn_accept_request)
     public void setBtnAcceptRequest() {
 
+        Log.d("IRFAN", "Working");
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -459,29 +518,52 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
             return;
         }
 
-        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//        if (location == null) {
+//            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest,
+//                    MechanicMapActivity.this);
+//
+//        } else {
+//            ActiveJob activeJob = new ActiveJob();
+//            activeJob.mechanicID = currUser.id;
+//            activeJob.mechLat = location.getLatitude();
+//            activeJob.mechLon = location.getLongitude();
+//            activeJob.startedAt = (new Date()).getTime();
+//
+//            Customer customer = Paper.book().read(Constants.CUSTOMER_KEY);
+//            activeJob.customerID = customer.id;
+//            activeJob.cusLon = customer.lng;
+//            activeJob.cusLat = customer.lat;
+//
+//            dbRef.child("activeJobs").push().setValue(activeJob);
+//        }
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        Log.d("IRFAN", "Location is: " + location);
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            // Logic to handle location object
+                            ActiveJob activeJob = new ActiveJob();
+                            activeJob.mechanicID = currUser.id;
+                            activeJob.mechLat = location.getLatitude();
+                            activeJob.mechLon = location.getLongitude();
+                            activeJob.startedAt = (new Date()).getTime();
 
-        if (location == null) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest,
-                    MechanicMapActivity.this);
+                            Customer customer = Paper.book().read(Constants.CUSTOMER_KEY);
+                            activeJob.customerID = customer.id;
+                            activeJob.cusLon = customer.lng;
+                            activeJob.cusLat = customer.lat;
 
-        } else {
-            ActiveJob activeJob = new ActiveJob();
-            activeJob.mechanicID = currUser.id;
-            activeJob.mechLat = location.getLatitude();
-            activeJob.mechLon = location.getLongitude();
-            activeJob.startedAt = (new Date()).getTime();
+                            dbRef.child("activeJobs").push().setValue(activeJob);
+                        }
+                    }
+                });
 
-            Customer customer = Paper.book().read(Constants.CUSTOMER_KEY);
-            activeJob.customerID = customer.id;
-            activeJob.cusLon = customer.lng;
-            activeJob.cusLat = customer.lat;
-
-            dbRef.child("activeJobs").push().setValue(activeJob);
-        }
 
         dbRef.child("requests").child(customer.id).removeValue();
-        dbRef.child("requests").removeEventListener(requestEventListener);
+        removedJobRequestListener();
 
         llAcceptRequest.setVisibility(View.GONE);
         llArrivedForWork.setVisibility(View.VISIBLE);
@@ -513,9 +595,9 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     }
 
 
-    @OnClick (R.id.btn_confirm_mechanic_request)
+    @OnClick (R.id.btn_arrived_for_work)
     public void setBtnArrivedForWork() {
-        dbRef.child("activeJobs").addValueEventListener(new ValueEventListener() {
+        dbRef.child("activeJobs").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -525,7 +607,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
                             String jobId = snapshot.getKey();
 
                             if (jobId != null)
-                            dbRef.child("activeJobs").child(jobId).child("jobStatus").setValue(1);
+                                dbRef.child("activeJobs").child(jobId).child("jobStatus").setValue(1);
                         }
                     }
                 }
@@ -553,6 +635,8 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         ActiveJob job = snapshot.getValue(ActiveJob.class);
                         if (job != null && currUser.id.equals(job.mechanicID)) {
+
+                            removedJobRequestListener();
 
                             llArrivedForWork.setVisibility(View.VISIBLE);
                             getCustomerData(job.customerID);
@@ -609,6 +693,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         ActiveJob job = snapshot.getValue(ActiveJob.class);
                         if (job != null && job.mechanicID.equals(currUser.id)) {
+                            removedJobRequestListener();
 
                             if (job.jobStatus == 2) {
                                 Intent intent = new Intent(MechanicMapActivity.this,

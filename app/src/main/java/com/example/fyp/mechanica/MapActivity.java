@@ -748,7 +748,9 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
                         ActiveJob job = snapshot.getValue(ActiveJob.class);
                         if (job!= null && job.customerID.equals(currUser.id)) {
                             String jobId = snapshot.getKey();
-                            confirmJob(jobId);
+
+                            dbRef.child("activeJobs").child(jobId).child("jobStatus").setValue(2);
+
                         }
                     }
                 }
@@ -766,9 +768,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
 
     public void confirmJob(String jobId) {
-        dbRef.child("activeJobs").child(jobId).child("jobStatus").setValue(2);
     }
-
 
     private double distance(double lat1, double lon1, double lat2, double lon2) {
         double theta = lon1 - lon2;

@@ -2,6 +2,7 @@ package com.example.fyp.mechanica;
 
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,8 @@ import com.example.fyp.mechanica.helpers.Constants;
 import com.example.fyp.mechanica.models.ActiveJob;
 import com.example.fyp.mechanica.models.DoneJob;
 import com.example.fyp.mechanica.models.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -54,7 +57,11 @@ public class JobStartedActivity extends BaseDrawerActivity {
     User currUser;
     ActiveJob job;
     String jobId;
+
     DatabaseReference dbRef;
+
+    ActiveJob activeJob;
+    String activeJobId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +84,10 @@ public class JobStartedActivity extends BaseDrawerActivity {
                 bar.setTitle("Mechanic is Working");
             }
         }
-
+        getJobStatus();
         startJobTime();
     }
+
 
     public static String getDateFromMillis(long d) {
         SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
@@ -87,50 +95,87 @@ public class JobStartedActivity extends BaseDrawerActivity {
         return df.format(d);
     }
 
+
     public void startJobTime() {
         startTime = SystemClock.uptimeMillis();
         customHandler.postDelayed(updateTimerThread, 0);
     }
 
+
     @OnClick(R.id.btn_done)
-    public void done(View v) {
+    public void done() {
         customHandler.removeCallbacks(updateTimerThread);
 
         bar.setTitle("Job Done");
         llRatingCard.setVisibility(View.VISIBLE);
 
         if (jobId != null && job != null) {
+            getActiveJob(job, jobId);
+//            DoneJob doneJob = new DoneJob();
+//            doneJob.customerLat = job.cusLat;
+//            doneJob.customerLng = job.cusLon;
+//            doneJob.customerUID = job.customerID;
+//            doneJob.endedAt = (new Date()).getTime();
+//            doneJob.mechanicUID = job.mechanicID;
+//            doneJob.startedAt = job.startedAt;
+//
+//            if (currUser.id.equals(job.mechanicID)) {
+//                showRatingCard(job.customerID);
+//
+//            } else {
+//                showRatingCard(job.mechanicID);
+//            }
+//
+//            dbRef.child("completedJobs").child(job.customerID).push().setValue(doneJob);
+//            dbRef.child("completedJobs").child(job.mechanicID).push().setValue(doneJob)
+//                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+//                @Override
+//                public void onComplete(@NonNull Task<Void> task) {
+//
+//                    dbRef.child("activeJobs").child(jobId).removeValue();
+//                }
+//            });
 
-            DoneJob doneJob = new DoneJob();
-            doneJob.customerLat = job.cusLat;
-            doneJob.customerLng = job.cusLon;
-            doneJob.customerUID = job.customerID;
-            doneJob.endedAt = (new Date()).getTime();
-            doneJob.mechanicUID = job.mechanicID;
-            doneJob.startedAt = job.startedAt;
-
-            if (currUser.id.equals(job.mechanicID)) {
-                showRatingCard(job.customerID);
-
-            } else {
-                showRatingCard(job.mechanicID);
-            }
-
-            dbRef.child("completedJobs").child(job.customerID).push().setValue(doneJob);
-            dbRef.child("completedJobs").child(job.mechanicID).push().setValue(doneJob);
-
-            dbRef.child("activeJobs").child(jobId).removeValue();
-
+        } else {
+            getActiveJob(activeJob, activeJobId);
         }
 
         long pkr = ((timeInMilliseconds / 1000) / 60) * 5;
-        tvPKR.setText(pkr + " PKR");
+        tvPKR.setText("PKR "+ pkr);
 
         String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
         tvDateTime.setText(currentDateTimeString);
 
 
     }
+
+    public void getActiveJob(ActiveJob job, final String jobId) {
+        DoneJob doneJob = new DoneJob();
+        doneJob.customerLat = job.cusLat;
+        doneJob.customerLng = job.cusLon;
+        doneJob.customerUID = job.customerID;
+        doneJob.endedAt = (new Date()).getTime();
+        doneJob.mechanicUID = job.mechanicID;
+        doneJob.startedAt = job.startedAt;
+
+        if (currUser.id.equals(job.mechanicID)) {
+            showRatingCard(job.customerID);
+
+        } else {
+            showRatingCard(job.mechanicID);
+        }
+
+        dbRef.child("completedJobs").child(job.customerID).push().setValue(doneJob);
+        dbRef.child("completedJobs").child(job.mechanicID).push().setValue(doneJob)
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                        dbRef.child("activeJobs").child(jobId).removeValue();
+                    }
+                });
+    }
+
 
     public void showRatingCard(String uid) {
         dbRef.child("users").child(uid).addValueEventListener(new ValueEventListener() {
@@ -151,11 +196,36 @@ public class JobStartedActivity extends BaseDrawerActivity {
         });
     }
 
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
 
     }
+
+    public void getJobStatus() {
+        dbRef.child("activeJobs")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ActiveJob job = snapshot.getValue(ActiveJob.class);
+                        if (job != null && (job.mechanicID.equals(currUser.id) || job.customerID.equals(currUser.id))) {
+                            activeJob = job;
+                            activeJobId = snapshot.getKey();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 
     private Runnable updateTimerThread = new Runnable() {
         public void run() {
