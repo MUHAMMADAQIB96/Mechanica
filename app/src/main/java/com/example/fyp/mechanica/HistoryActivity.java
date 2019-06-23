@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ListView;
 
 import com.example.fyp.mechanica.adapters.HistoryListAdapter;
@@ -24,7 +25,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.paperdb.Paper;
 
-public class HistoryActivity extends AppCompatActivity {
+public class HistoryActivity extends BaseDrawerActivity {
 
     @BindView(R.id.lv_history) ListView listView;
 
@@ -59,10 +60,13 @@ public class HistoryActivity extends AppCompatActivity {
                     jobs.clear();
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         DoneJob doneJob = snapshot.getValue(DoneJob.class);
-                        if (currUser.id.equals(snapshot.getKey())) {
+//                        if (currUser.id.equals(snapshot.getKey())) {
                             jobs.add(doneJob);
 
+
                             if (doneJob != null) {
+                                Log.d("IRFAN", "JOB: "+ doneJob);
+
                                 if (currUser.userRole.equals("Mechanic")) {
                                     getUser( doneJob.customerUID);
 
@@ -71,7 +75,7 @@ public class HistoryActivity extends AppCompatActivity {
                                 }
 
                             }
-                        }
+//                        }
                     }
 
                     adapter.notifyDataSetChanged();

@@ -52,7 +52,7 @@ public class HistoryListAdapter extends ArrayAdapter {
 
         DoneJob job = jobs.get(position);
 
-        tvName.setText(user.name);
+//        tvName.setText(user.name);
         tvPKR.setText("PKR "+ getPKR(job.startedAt, job.endedAt));
 
         Date date = new Date(job.endedAt);
