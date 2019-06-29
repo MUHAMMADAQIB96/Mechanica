@@ -27,6 +27,7 @@ import com.example.fyp.mechanica.helpers.Constants;
 import com.example.fyp.mechanica.helpers.Helper;
 import com.example.fyp.mechanica.models.ActiveJob;
 import com.example.fyp.mechanica.models.Customer;
+import com.example.fyp.mechanica.models.LiveMechanic;
 import com.example.fyp.mechanica.models.MLocation;
 import com.example.fyp.mechanica.models.User;
 import com.google.android.gms.common.ConnectionResult;
@@ -145,73 +146,6 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
 
     }
 
-//    private void initMap() {
-//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-//        if (mapFragment != null) {
-//            mapFragment.getMapAsync(new OnMapReadyCallback() {
-//                @Override
-//                public void onMapReady(GoogleMap googleMap) {
-//                    map = googleMap;
-//
-//                    if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-//                            != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapActivity.this,
-//                            Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                        // TODO: Consider calling
-//                        //    ActivityCompat#requestPermissions
-//                        // here to request the missing permissions, and then overriding
-//                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//                        //                                          int[] grantResults)
-//                        // to handle the case where the user grants the permission. See the documentation
-//                        // for ActivityCompat#requestPermissions for more details.
-//                        return;
-//                    }
-//                    map.setMyLocationEnabled(true);
-//                }
-//            });
-//        }
-//
-//    }
-
-//    public void getLocationPermission() {
-//        String [] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
-//        Manifest.permission.ACCESS_COARSE_LOCATION};
-//
-//        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), FIND_LOCATION)
-//                == PackageManager.PERMISSION_GRANTED) {
-//            if (ContextCompat.checkSelfPermission(this.getApplicationContext(), COARSE_LOCATION)
-//                    == PackageManager.PERMISSION_GRANTED) {
-//                    isPermGranted = true;
-//
-//            } else {
-//                ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE );
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//
-//        isPermGranted = false;
-//
-//        switch (requestCode) {
-//            case LOCATION_PERMISSION_REQUEST_CODE:
-//                if (grantResults.length > 0) {
-//
-//                    for (int i = 0; i < grantResults.length; i++) {
-//                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-//                            isPermGranted = false;
-//                            return;
-//                        }
-//                    }
-//                }
-//                    isPermGranted = true;
-//                    // initialize map
-//                        initMap();
-//                }
-//        }
-//
-
     @NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     void showMap() {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -221,23 +155,6 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
 
     }
 
-//
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        //Now lets connect to the API
-//        mGoogleApiClient.connect();
-//    }
-
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//
-//        if (mGoogleApiClient.isConnected()) {
-//            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, (com.google.android.gms.location.LocationListener) MapActivity.this);
-//            mGoogleApiClient.disconnect();
-//        }
-//    }
 
     ValueEventListener requestEventListener = new ValueEventListener() {
         @Override
@@ -473,16 +390,20 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     public void onLocationChanged(Location location) {
         currentLatitude = location.getLatitude();
         currentLongitude = location.getLongitude();
+//
+//        MLocation mLocation = new MLocation();
+//        mLocation.latitude = currentLatitude;
+//        mLocation.longitude = currentLongitude;
 
-        MLocation mLocation = new MLocation();
-        mLocation.latitude = currentLatitude;
-        mLocation.longitude = currentLongitude;
+        LiveMechanic mechanic = new LiveMechanic();
+        mechanic.latitude = location.getLatitude();
+        mechanic.longitude = location.getLongitude();
 
         if (currUser.userRole.equals("Mechanic")) {
             if (super.isOnline) {
-                dbRef.child("lives").child(currUser.id).setValue(mLocation);
+                dbRef.child("lives").child(currUser.id).setValue(mechanic);
 
-                LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(latLng);
                 markerOptions.title("Current Position");

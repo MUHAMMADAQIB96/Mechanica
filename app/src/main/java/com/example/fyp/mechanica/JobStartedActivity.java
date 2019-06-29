@@ -18,6 +18,7 @@ import com.example.fyp.mechanica.helpers.Constants;
 import com.example.fyp.mechanica.models.ActiveJob;
 import com.example.fyp.mechanica.models.DoneJob;
 import com.example.fyp.mechanica.models.User;
+import com.example.fyp.mechanica.models.UserRating;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -63,6 +64,8 @@ public class JobStartedActivity extends BaseDrawerActivity {
     ActiveJob activeJob;
     String activeJobId;
 
+    float currRating;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +89,7 @@ public class JobStartedActivity extends BaseDrawerActivity {
         }
         getJobStatus();
         startJobTime();
+        ratingBarChange();
     }
 
 
@@ -111,30 +115,30 @@ public class JobStartedActivity extends BaseDrawerActivity {
 
         if (jobId != null && job != null) {
             getActiveJob(job, jobId);
-//            DoneJob doneJob = new DoneJob();
-//            doneJob.customerLat = job.cusLat;
-//            doneJob.customerLng = job.cusLon;
-//            doneJob.customerUID = job.customerID;
-//            doneJob.endedAt = (new Date()).getTime();
-//            doneJob.mechanicUID = job.mechanicID;
-//            doneJob.startedAt = job.startedAt;
-//
-//            if (currUser.id.equals(job.mechanicID)) {
-//                showRatingCard(job.customerID);
-//
-//            } else {
-//                showRatingCard(job.mechanicID);
-//            }
-//
-//            dbRef.child("completedJobs").child(job.customerID).push().setValue(doneJob);
-//            dbRef.child("completedJobs").child(job.mechanicID).push().setValue(doneJob)
-//                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-//                @Override
-//                public void onComplete(@NonNull Task<Void> task) {
-//
-//                    dbRef.child("activeJobs").child(jobId).removeValue();
-//                }
-//            });
+            DoneJob doneJob = new DoneJob();
+            doneJob.customerLat = job.cusLat;
+            doneJob.customerLng = job.cusLon;
+            doneJob.customerUID = job.customerID;
+            doneJob.endedAt = (new Date()).getTime();
+            doneJob.mechanicUID = job.mechanicID;
+            doneJob.startedAt = job.startedAt;
+
+            if (currUser.id.equals(job.mechanicID)) {
+                showRatingCard(job.customerID);
+
+            } else {
+                showRatingCard(job.mechanicID);
+            }
+
+            dbRef.child("completedJobs").child(job.customerID).push().setValue(doneJob);
+            dbRef.child("completedJobs").child(job.mechanicID).push().setValue(doneJob)
+                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+
+                    dbRef.child("activeJobs").child(jobId).removeValue();
+                }
+            });
 
         } else {
             getActiveJob(activeJob, activeJobId);
@@ -203,6 +207,7 @@ public class JobStartedActivity extends BaseDrawerActivity {
 
     }
 
+
     public void getJobStatus() {
         dbRef.child("activeJobs")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -234,4 +239,62 @@ public class JobStartedActivity extends BaseDrawerActivity {
             customHandler.postDelayed(this, 1000);
         }
     };
+
+
+    public void ratingBarChange() {
+        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            @Override
+            public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
+                currRating = v;
+                if (currUser.id.equals(job.customerID)) {
+                    setRating(job.mechanicID, currRating);
+
+                } else {
+                    setRating(job.customerID, v);
+                }
+
+            }
+
+        });
+
+
+    }
+
+    public void setRating(String uid, final float v) {
+        dbRef.child("ratings").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    UserRating rating = dataSnapshot.getValue(UserRating.class);
+                    if (rating != null) {
+                        float newRating =  calculateRating(rating.count, rating.rating, v);
+
+                        UserRating userRating = new UserRating();
+                        userRating.count = rating.count + 1;
+                        userRating.rating = newRating;
+
+                        dbRef.child("ratings").child(currUser.id).setValue(userRating);
+                    }
+                }
+
+                else {
+                    UserRating userRating = new UserRating();
+                    userRating.count = 1;
+                    userRating.rating = currRating;
+
+                    dbRef.child("ratings").child(currUser.id).setValue(userRating);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public float calculateRating(int count, float overAllRating, float currRating) {
+        return (((count * overAllRating) + currRating) / (count+1));
+    }
+
 }

@@ -115,7 +115,7 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
             getLocation();
 
             MenuItem menuItem = navigation_view.getMenu().findItem(R.id.nav_switch); // This is the menu item that contains your switch
-            switchCompat = (SwitchCompat) menuItem.getActionView().findViewById(R.id.switcher);
+            switchCompat = menuItem.getActionView().findViewById(R.id.switcher);
             checkOnlineStatus();
 
             switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -213,36 +213,7 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
 
         switch (item.getItemId()) {
             case R.id.nav_switch:
-//                checkOnlineStatus();
 
-//                switchCompat.setOnCheckedChangeListener(null);
-//                switchCompat.setChecked(checkOnlineStatus());
-
-                getLocation();
-                switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                        Log.d("IRFAN", "State changed");
-                    }
-                });
-                switchCompat.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (switchCompat.isChecked()) {
-                            Log.d("IRFAN", String.valueOf(view));
-
-                            OnlineUser user = new OnlineUser();
-                            user.latitude = lat;
-                            user.longitude = lng;
-                            dbRef.child("lives").child(currentUser.id).setValue(user);
-
-                        } else {
-                            dbRef.child("lives").child(currentUser.id).removeValue();
-                            Log.d("IRFAN", String.valueOf(switchCompat.isChecked()));
-
-                        }
-                    }
-                });
                 break;
 
             case R.id.menu_drawer_item_history:
@@ -256,10 +227,6 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
             case R.id.menu_drawer_item_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
-//
-//            case R.id.menu_drawer_item_about:
-//                startActivity(new Intent(this, AboutActivity.class));
-//                break;
 
             case R.id.menu_drawer_item_sign_out:
                 FirebaseAuth.getInstance().signOut();
