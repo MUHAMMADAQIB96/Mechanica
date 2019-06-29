@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -115,6 +116,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     AlertDialog dialog;
     ActionBar bar;
 
+    String phoneNumber;
     ActiveJob activeJob = new ActiveJob();
     ValueEventListener jobRequestEventListener;
 
@@ -282,7 +284,6 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     @Override
     protected void onStart() {
         super.onStart();
-
         jobRequestEventListener =  new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -330,7 +331,6 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
         getActiveJobInfo();
         getJobStatus();
 
-
     }
 
 
@@ -338,6 +338,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
         dbRef.child("requests").removeEventListener(jobRequestEventListener);
 
     }
+
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -393,10 +394,12 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
 
     }
 
+
     @Override
     public void onConnectionSuspended(int i) {
 
     }
+
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -623,7 +626,9 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
 
     @OnClick(R.id.btn_call_customer)
     public void setBtnCallCustomer() {
-
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        this.startActivity(intent);
     }
 
 
@@ -669,6 +674,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
                     User user = dataSnapshot.getValue(User.class);
                     if (user != null) {
                         customer = user;
+                        phoneNumber = user.phoneNumber;
                         tvCustomerName.setText(user.name);
                         tvVehicleInfo.setText(user.vehicle.type + " | " + user.vehicle.registrationNo);
 
@@ -699,7 +705,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
                                 Intent intent = new Intent(MechanicMapActivity.this,
                                         JobStartedActivity.class);
                                 intent.putExtra("JOB_ID", snapshot.getKey());
-                                intent.putExtra("JOB", (Parcelable) job);
+                                intent.putExtra("JOB", job);
                                 startActivity(intent);
                             }
                         }

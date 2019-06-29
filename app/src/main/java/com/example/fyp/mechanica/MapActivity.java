@@ -32,6 +32,7 @@ import com.directions.route.RoutingListener;
 import com.example.fyp.mechanica.helpers.Constants;
 import com.example.fyp.mechanica.helpers.Helper;
 import com.example.fyp.mechanica.models.ActiveJob;
+import com.example.fyp.mechanica.models.LiveMechanic;
 import com.example.fyp.mechanica.models.MLocation;
 import com.example.fyp.mechanica.models.User;
 import com.google.android.gms.common.ConnectionResult;
@@ -121,6 +122,8 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
     Location mLastLocation;
     Marker mCurrLocationMarker;
 
+    String phoneNumber;
+
     MLocation mLocation;
 
     AlertDialog dialog;
@@ -164,14 +167,14 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        MLocation location = snapshot.getValue(MLocation.class);
+                        LiveMechanic mechanic = snapshot.getValue(LiveMechanic.class);
 
 
-                        if (location != null) {
-                            double distance = distance(location.latitude, location.longitude,
+                        if (mechanic != null) {
+                            double distance = distance(mechanic.latitude, mechanic.longitude,
                                     currentLatitude, currentLongitude);
 
-                            LatLng latLng = new LatLng(location.latitude, location.longitude);
+                            LatLng latLng = new LatLng(mechanic.latitude, mechanic.longitude);
                             mGoogleMap.addMarker(new MarkerOptions().position(latLng)
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.mechanic_maker_48_ic))
                                     .title(distance + " KM"));
@@ -709,6 +712,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
                             llRequest.setVisibility(View.GONE);
                             tvFindingMechanic.setText("Your mechanic is on way...");
+                            llCancelRequest.setVisibility(View.GONE);
                             llMechanicCard.setVisibility(View.VISIBLE);
 
                             double distance = distance(job.cusLat, job.cusLon, job.mechLat, job.mechLon);
@@ -764,7 +768,11 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     User user = dataSnapshot.getValue(User.class);
-                    tvName.setText(user.name);
+                    if (user != null) {
+                        tvName.setText(user.name);
+                        phoneNumber = user.phoneNumber;
+
+                    }
                 }
             }
 
@@ -778,13 +786,13 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
     @OnClick(R.id.btn_call_mech)
     public void setBtnCallMech() {
-//        callToMechanic("");
+        callToMechanic(phoneNumber);
     }
 
 
     @OnClick(R.id.btn_call_mechanic)
     public void setBtnCallMechanic() {
-//        callToMechanic("");
+        callToMechanic(phoneNumber);
     }
 
 

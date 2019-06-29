@@ -1,6 +1,8 @@
 package com.example.fyp.mechanica.models;
 
-public class ActiveJob {
+import java.io.Serializable;
+
+public class ActiveJob implements Serializable {
     public double cusLat;
     public double cusLon;
     public String customerID;

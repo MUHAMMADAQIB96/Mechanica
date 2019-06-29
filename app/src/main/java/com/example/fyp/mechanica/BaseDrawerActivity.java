@@ -2,12 +2,14 @@ package com.example.fyp.mechanica;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -21,9 +23,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.example.fyp.mechanica.helpers.Constants;
+import com.example.fyp.mechanica.models.LiveMechanic;
 import com.example.fyp.mechanica.models.OnlineUser;
 import com.example.fyp.mechanica.models.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -104,6 +108,35 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        getLocation();
+
+        MenuItem menuItem = navigation_view.getMenu().findItem(R.id.nav_switch); // This is the menu item that contains your switch
+        switchCompat = (SwitchCompat) menuItem.getActionView().findViewById(R.id.switcher);
+        checkOnlineStatus();
+
+        switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // Your logic goes here
+                if (isChecked) {
+                    LiveMechanic mechanic = new LiveMechanic();
+                    mechanic.latitude = lat;
+                    mechanic.longitude = lng;
+
+                    dbRef.child("lives").child(currentUser.id).setValue(mechanic);
+
+                } else {
+                    dbRef.child("lives").child(currentUser.id).removeValue();
+                }
+            }
+        });
+
+    }
+
+    @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         mDrawerToggle.syncState();
@@ -177,7 +210,6 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
 
         switch (item.getItemId()) {
             case R.id.nav_switch:
-                switchCompat = findViewById(R.id.switcher);
 //                checkOnlineStatus();
 
 //                switchCompat.setOnCheckedChangeListener(null);
@@ -250,6 +282,7 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
                         if (id != null && id.equals(currentUser.id)) {
                             isOnline = true;
                             Log.d("IRFAN", id);
+                            switchCompat.setChecked(true);
 
 //                            switchCompat.setOnCheckedChangeListener(null);
 //                            switchCompat.setChecked(true);
@@ -265,6 +298,7 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
         });
 
     }
+
 
     public void getLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
