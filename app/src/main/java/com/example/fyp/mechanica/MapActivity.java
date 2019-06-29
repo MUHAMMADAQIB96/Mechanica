@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -81,11 +82,15 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 //         RoutingListener {s
 
     @BindView(R.id.ll_request) LinearLayout llRequest;
+    @BindView(R.id.ll_cancel_request) LinearLayout llCancelRequest;
+    @BindView(R.id.btn_cancel_request) Button btnCancelRequest;
+
     @BindView(R.id.tv_address) TextView tvAddress;
+    @BindView(R.id.cv_address) CardView cvAddress;
 
     @BindView(R.id.btn_request) Button btnRequest;
     @BindView(R.id.btn_confirm_location) Button btnConfirmLocation;
-    @BindView(R.id.tv_finding_mechanic) TextView textView;
+    @BindView(R.id.tv_finding_mechanic) TextView tvFindingMechanic;
 
     @BindView(R.id.ll_mechanic_card) LinearLayout llMechanicCard;
     @BindView(R.id.tv_cust_km) TextView tvKMAway;
@@ -641,14 +646,17 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
         bar.setTitle("Request Mechanic");
 
-        tvAddress.setVisibility(View.VISIBLE);
+        cvAddress.setVisibility(View.VISIBLE);
+        getAddress(currentLatitude, currentLongitude);
     }
 
 
     @OnClick(R.id.btn_request)
     public void requestMechanic() {
-        textView.setVisibility(View.VISIBLE);
+        tvFindingMechanic.setVisibility(View.VISIBLE);
+        llCancelRequest.setVisibility(View.VISIBLE);
         btnRequest.setVisibility(View.GONE);
+        cvAddress.setVisibility(View.GONE);
 
         if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapActivity.this,
@@ -681,6 +689,13 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
         }
     }
 
+    @OnClick(R.id.btn_cancel_request)
+    public void cancelRequest() {
+        dbRef.child("requests").child(currUser.id).removeValue();
+        btnConfirmLocation.setVisibility(View.VISIBLE);
+        tvFindingMechanic.setVisibility(View.GONE);
+        llCancelRequest.setVisibility(View.GONE);
+    }
 
     public void checkRequestsResponse() {
         dbRef.child("activeJobs").addValueEventListener(new ValueEventListener() {
@@ -692,6 +707,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
                         if (job != null && job.customerID.equals(currUser.id)) {
 
                             llRequest.setVisibility(View.GONE);
+                            tvFindingMechanic.setText("Your mechanic is on way...");
                             llMechanicCard.setVisibility(View.VISIBLE);
 
                             double distance = distance(job.cusLat, job.cusLon, job.mechLat, job.mechLon);
@@ -892,6 +908,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 
 //
 //    @Override

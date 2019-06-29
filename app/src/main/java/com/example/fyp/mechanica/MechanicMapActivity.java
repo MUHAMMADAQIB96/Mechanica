@@ -76,7 +76,7 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     @BindView(R.id.btn_vehicle_detail) Button btnVehicleDetail;
 
     @BindView(R.id.btn_arrived_for_work) Button btnArrivedForWork;
-    @BindView(R.id.btn_call_mechanic) Button btnCallMechanic;
+    @BindView(R.id.btn_call_customer) Button btnCallCustomer;
 
     @BindView(R.id.ll_arrived_for_work) LinearLayout llArrivedForWork;
     @BindView(R.id.ll_request) LinearLayout llAcceptRequest;
@@ -621,8 +621,8 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     }
 
 
-    @OnClick(R.id.btn_call_mechanic)
-    public void setBtnCallMechanic() {
+    @OnClick(R.id.btn_call_customer)
+    public void setBtnCallCustomer() {
 
     }
 

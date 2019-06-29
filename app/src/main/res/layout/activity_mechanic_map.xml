@@ -83,7 +83,7 @@
                     android:text="Arrived For Work"/>
 
                 <Button
-                    android:id="@+id/btn_call_mechanic"
+                    android:id="@+id/btn_call_customer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
