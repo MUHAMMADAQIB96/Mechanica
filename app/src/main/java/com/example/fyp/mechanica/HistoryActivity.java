@@ -65,7 +65,6 @@ public class HistoryActivity extends BaseDrawerActivity {
                             jobs.add(doneJob);
 
                             if (doneJob != null) {
-                                Log.d("IRFAN", "JOB: "+ doneJob);
 
                                 if (currUser.userRole.equals("Mechanic")) {
                                     getUser( doneJob.customerUID);

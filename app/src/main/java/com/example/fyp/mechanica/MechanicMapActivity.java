@@ -429,8 +429,6 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
     @OnClick(R.id.btn_accept_request)
     public void setBtnAcceptRequest() {
 
-        Log.d("IRFAN", "Working");
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -467,7 +465,6 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        Log.d("IRFAN", "Location is: " + location);
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
                             // Logic to handle location object

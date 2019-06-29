@@ -956,7 +956,6 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 //    @Override
 //    public void onRoutingFailure(RouteException e) {
 //        if(e != null) {
-//            Log.d("IRFAN", e.getMessage());
 //            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
 //        }else {
 //            Toast.makeText(this, "Something went wrong, Try again", Toast.LENGTH_SHORT).show();
