@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -761,18 +762,20 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
     @OnClick(R.id.btn_call_mech)
     public void setBtnCallMech() {
-        callToMechanic();
+//        callToMechanic("");
     }
 
 
     @OnClick(R.id.btn_call_mechanic)
     public void setBtnCallMechanic() {
-        callToMechanic();
+//        callToMechanic("");
     }
 
 
-    public void callToMechanic() {
-
+    public void callToMechanic(String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        this.startActivity(intent);
     }
 
 
