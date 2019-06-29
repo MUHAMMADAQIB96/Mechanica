@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -20,6 +22,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.directions.route.AbstractRouting;
+import com.directions.route.Route;
+import com.directions.route.RouteException;
+import com.directions.route.Routing;
+import com.directions.route.RoutingListener;
 import com.example.fyp.mechanica.helpers.Constants;
 import com.example.fyp.mechanica.helpers.Helper;
 import com.example.fyp.mechanica.models.ActiveJob;
@@ -31,6 +38,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -39,6 +47,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -47,8 +57,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
+import butterknife.BindInt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -63,8 +78,10 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
         LocationListener,
         OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener {
+//         RoutingListener {s
 
     @BindView(R.id.ll_request) LinearLayout llRequest;
+    @BindView(R.id.tv_address) TextView tvAddress;
 
     @BindView(R.id.btn_request) Button btnRequest;
     @BindView(R.id.btn_confirm_location) Button btnConfirmLocation;
@@ -102,6 +119,10 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
     AlertDialog dialog;
     ActionBar bar;
+
+    private List<Polyline> polylines;
+    LatLng start;
+    LatLng end;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +190,22 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
         mLocationRequest.setInterval(10 * 1000);
         mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        polylines = new ArrayList<>();
+
+        start = new LatLng(24.9128302, 67.0920466);
+        end = new LatLng(24.8707794, 67.3553665);
+
+//        Routing routing = new Routing.Builder()
+//                .travelMode(AbstractRouting.TravelMode.DRIVING)
+//                .withListener(this)
+//                .alternativeRoutes(true)
+//                .waypoints(start, end)
+//                .key(getResources().getString(R.string.google_map_api_key))
+//                .build();
+//
+//        routing.execute();
+
 
     }
 
@@ -603,6 +640,8 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
         btnConfirmLocation.setVisibility(View.GONE);
 
         bar.setTitle("Request Mechanic");
+
+        tvAddress.setVisibility(View.VISIBLE);
     }
 
 
@@ -766,9 +805,36 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
     }
 
+//
+//    private double distance(double lat1, double lon1, double lat2, double lon2) {
+//        double theta = lon1 - lon2;
+//        double dist = Math.sin(deg2rad(lat1))
+//                * Math.sin(deg2rad(lat2))
+//                + Math.cos(deg2rad(lat1))
+//                * Math.cos(deg2rad(lat2))
+//                * Math.cos(deg2rad(theta));
+//        dist = Math.acos(dist);
+//        dist = rad2deg(dist);
+//        dist = dist * 60 * 1.1515;
+//
+//        return milesIntoKiloMeter(dist);
+////        return (dist);
+//    }
+//
+//    private double deg2rad(double deg) {
+//        return (deg * Math.PI / 180.0);
+//    }
+//
+//    private double rad2deg(double rad) {
+//        return (rad * 180.0 / Math.PI);
+//    }
+//
+//    private double milesIntoKiloMeter(double miles) {
+//        double km = miles / 0.62137;
+//
+//        return Math.round(km * 10) / 10.0;
+//    }
 
-    public void confirmJob(String jobId) {
-    }
 
     private double distance(double lat1, double lon1, double lat2, double lon2) {
         double theta = lon1 - lon2;
@@ -798,4 +864,104 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
         return Math.round(km * 10) / 10.0;
     }
+
+    public void getAddress(double lat, double lng) {
+        Geocoder geocoder = new Geocoder(MapActivity.this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+            Address obj = addresses.get(0);
+            String add = obj.getAddressLine(0);
+            tvAddress.setText(add);
+
+//            add = add + "\n" + obj.getCountryName();
+//            add = add + "\n" + obj.getCountryCode();
+//            add = add + "\n" + obj.getAdminArea();
+//            add = add + "\n" + obj.getPostalCode();
+//            add = add + "\n" + obj.getSubAdminArea();
+//            add = add + "\n" + obj.getLocality();
+//            add = add + "\n" + obj.getSubThoroughfare();
+
+            Log.v("IGA", "Address" + add);
+            // Toast.makeText(this, "Address=>" + add,
+            // Toast.LENGTH_SHORT).show();
+
+            // TennisAppActivity.showDialog(add);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+//
+//    @Override
+//    public void onRoutingFailure(RouteException e) {
+//        if(e != null) {
+//            Log.d("IRFAN", e.getMessage());
+//            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+//        }else {
+//            Toast.makeText(this, "Something went wrong, Try again", Toast.LENGTH_SHORT).show();
+//        }
+//    }
+//
+//    @Override
+//    public void onRoutingStart() {
+//
+//    }
+//
+//    @Override
+//    public void onRoutingSuccess(ArrayList<Route> arrayList, int i) {
+//        Toast.makeText(this, "Routing success", Toast.LENGTH_SHORT).show();
+//        CameraUpdate center = CameraUpdateFactory.newLatLng(start);
+//        CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
+//
+//        mGoogleMap.moveCamera(center);
+//
+//
+//        if(polylines.size()>0) {
+//            for (Polyline poly : polylines) {
+//                poly.remove();
+//            }
+//        }
+//
+//        polylines = new ArrayList<>();
+//        //add route(s) to the map.
+////        for (int i = 0; i <route.size(); i++) {
+////
+////            //In case of more than 5 alternative routes
+////            int colorIndex = i % COLORS.length;
+////
+////            PolylineOptions polyOptions = new PolylineOptions();
+////            polyOptions.color(getResources().getColor(COLORS[colorIndex]));
+////            polyOptions.width(10 + i * 3);
+////            polyOptions.addAll(route.get(i).getPoints());
+////            Polyline polyline = map.addPolyline(polyOptions);
+////            polylines.add(polyline);
+////
+////            Toast.makeText(getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
+////        }
+//
+//        // Start marker
+//        MarkerOptions options = new MarkerOptions();
+//        options.position(start);
+//        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+////        options.icon(BitmapDescriptorFactory.fromResource());
+//        mGoogleMap.addMarker(options);
+//
+//        // End marker
+//        options = new MarkerOptions();
+//        options.position(end);
+//        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+////        options.icon(BitmapDescriptorFactory.fromResource(R.drawable.end_green));
+//        mGoogleMap.addMarker(options);
+//
+//
+//    }
+//
+//    @Override
+//    public void onRoutingCancelled() {
+//
+//    }
+//
+
 }

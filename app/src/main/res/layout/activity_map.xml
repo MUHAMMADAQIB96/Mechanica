@@ -24,6 +24,15 @@
         android:id="@+id/map"
         class="com.google.android.gms.maps.SupportMapFragment">
 
+        <TextView
+            android:id="@+id/tv_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:padding="@dimen/spacing_small"
+            android:layout_margin="@dimen/spacing_normal"
+            />
+
         <LinearLayout
             android:id="@+id/ll_request"
             android:layout_width="match_parent"

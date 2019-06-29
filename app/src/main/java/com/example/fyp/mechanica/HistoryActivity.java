@@ -53,7 +53,8 @@ public class HistoryActivity extends BaseDrawerActivity {
 
         jobs = new ArrayList<>();
 
-        dbRef.child("completedJobs").child(currUser.id).addValueEventListener(new ValueEventListener() {
+        dbRef.child("completedJobs").child(currUser.id)
+                .addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -62,7 +63,6 @@ public class HistoryActivity extends BaseDrawerActivity {
                         DoneJob doneJob = snapshot.getValue(DoneJob.class);
 //                        if (currUser.id.equals(snapshot.getKey())) {
                             jobs.add(doneJob);
-
 
                             if (doneJob != null) {
                                 Log.d("IRFAN", "JOB: "+ doneJob);
@@ -94,7 +94,8 @@ public class HistoryActivity extends BaseDrawerActivity {
     }
 
     public void getUser(String uid) {
-        dbRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+        dbRef.child("users").child(uid)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {

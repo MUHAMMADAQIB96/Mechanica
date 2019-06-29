@@ -28,8 +28,8 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/civ_user_photo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="@dimen/spacing_normal"
             android:src="@drawable/avatar"
@@ -46,6 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
+                android:textSize="@dimen/font_normal"
                 android:text="Zafar Ali"/>
 
             <RatingBar
@@ -61,12 +62,34 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_location"
+    <LinearLayout
         android:layout_below="@id/ll_user_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=" Near 13th Lane- DHA Phase 7 Phase 2 Commercial..."
-        android:drawableStart="@drawable/ic_my_location_24dp"/>
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_small"
+            android:src="@drawable/ic_my_location_24dp"/>
+
+        <TextView
+            android:id="@+id/tv_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/font_small"
+            android:text="Any thing you can type it here....."
+            />
+
+    </LinearLayout>
+
+    <!--<TextView-->
+        <!--android:id="@+id/tv_location"-->
+        <!--android:layout_below="@id/ll_user_info"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text=" Near 13th Lane- DHA Phase 7 Phase 2 Commercial..."-->
+        <!--android:drawableStart="@drawable/ic_my_location_24dp"/>-->
 
 </RelativeLayout>
