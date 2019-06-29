@@ -134,6 +134,7 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
                     }
                 }
             });
+
         }
     }
 
@@ -261,6 +262,7 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
 
             case R.id.menu_drawer_item_sign_out:
                 FirebaseAuth.getInstance().signOut();
+                dbRef.child("lives").child(currentUser.id).removeValue();
                 Intent intent = new Intent(this, LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 Paper.book().delete(Constants.CURR_USER_KEY);
