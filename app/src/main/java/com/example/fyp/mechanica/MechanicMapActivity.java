@@ -479,18 +479,20 @@ public class MechanicMapActivity extends BaseDrawerActivity implements GoogleApi
         mLocation.longitude = currentLongitude;
 
         if (currUser.userRole.equals("Mechanic")) {
-            dbRef.child("lives").child(currUser.id).setValue(mLocation);
+            if (super.isOnline) {
+                dbRef.child("lives").child(currUser.id).setValue(mLocation);
 
-            LatLng latLng = new LatLng(currentLatitude, currentLongitude);
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(latLng);
-            markerOptions.title("Current Position");
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-            mCurrLocationMarker = mGoogleMap.addMarker(markerOptions);
+                LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(latLng);
+                markerOptions.title("Current Position");
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+                mCurrLocationMarker = mGoogleMap.addMarker(markerOptions);
 
-            //move map camera
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+                //move map camera
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+            }
         }
 
         mLastLocation = location;

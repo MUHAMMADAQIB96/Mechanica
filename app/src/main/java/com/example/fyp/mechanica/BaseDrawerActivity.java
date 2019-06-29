@@ -121,7 +121,8 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
             switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    // Your logic goes here
+                    isOnline = isChecked;
+
                     if (isChecked) {
                         LiveMechanic mechanic = new LiveMechanic();
                         mechanic.latitude = lat;
@@ -276,7 +277,7 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
 
 
     public void checkOnlineStatus() {
-        dbRef.child("lives").addValueEventListener(new ValueEventListener() {
+        dbRef.child("lives").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists())
@@ -284,12 +285,7 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
                         String id = snapshot.getKey();
                         if (id != null && id.equals(currentUser.id)) {
                             isOnline = true;
-                            Log.d("IRFAN", id);
                             switchCompat.setChecked(true);
-
-//                            switchCompat.setOnCheckedChangeListener(null);
-//                            switchCompat.setChecked(true);
-
                         }
                     }
             }
