@@ -111,29 +111,30 @@ public class BaseDrawerActivity extends AppCompatActivity implements MenuItem.On
     protected void onStart() {
         super.onStart();
 
-        getLocation();
+        if (currentUser.userRole.equalsIgnoreCase("mechanic")) {
+            getLocation();
 
-        MenuItem menuItem = navigation_view.getMenu().findItem(R.id.nav_switch); // This is the menu item that contains your switch
-        switchCompat = (SwitchCompat) menuItem.getActionView().findViewById(R.id.switcher);
-        checkOnlineStatus();
+            MenuItem menuItem = navigation_view.getMenu().findItem(R.id.nav_switch); // This is the menu item that contains your switch
+            switchCompat = (SwitchCompat) menuItem.getActionView().findViewById(R.id.switcher);
+            checkOnlineStatus();
 
-        switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // Your logic goes here
-                if (isChecked) {
-                    LiveMechanic mechanic = new LiveMechanic();
-                    mechanic.latitude = lat;
-                    mechanic.longitude = lng;
+            switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    // Your logic goes here
+                    if (isChecked) {
+                        LiveMechanic mechanic = new LiveMechanic();
+                        mechanic.latitude = lat;
+                        mechanic.longitude = lng;
 
-                    dbRef.child("lives").child(currentUser.id).setValue(mechanic);
+                        dbRef.child("lives").child(currentUser.id).setValue(mechanic);
 
-                } else {
-                    dbRef.child("lives").child(currentUser.id).removeValue();
+                    } else {
+                        dbRef.child("lives").child(currentUser.id).removeValue();
+                    }
                 }
-            }
-        });
-
+            });
+        }
     }
 
     @Override

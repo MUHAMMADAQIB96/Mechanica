@@ -11,6 +11,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -54,6 +55,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -63,6 +65,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -121,6 +124,7 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
     Marker mCurrLocationMarker;
+    HashMap<String, Marker> mechMarkers = new HashMap<>();
 
     String phoneNumber;
 
@@ -163,28 +167,56 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
         if (currUser.userRole.equals("Customer")) {
 
-            dbRef.child("lives").addListenerForSingleValueEvent(new ValueEventListener() {
+            dbRef.child("lives").addChildEventListener(new ChildEventListener() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        LiveMechanic mechanic = snapshot.getValue(LiveMechanic.class);
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    LiveMechanic mechanic = dataSnapshot.getValue(LiveMechanic.class);
+                    if (mechanic != null) {
+                        double distance = distance(mechanic.latitude, mechanic.longitude,
+                                currentLatitude, currentLongitude);
 
+                        LatLng latLng = new LatLng(mechanic.latitude, mechanic.longitude);
+                        Marker marker = mGoogleMap.addMarker(new MarkerOptions().position(latLng)
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.mechanic_maker_48_ic))
+                                .title(distance + " KM"));
 
-                        if (mechanic != null) {
-                            double distance = distance(mechanic.latitude, mechanic.longitude,
-                                    currentLatitude, currentLongitude);
+                        mechMarkers.put(dataSnapshot.getKey(), marker);
+                    }
+                }
 
-                            LatLng latLng = new LatLng(mechanic.latitude, mechanic.longitude);
-                            mGoogleMap.addMarker(new MarkerOptions().position(latLng)
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    LiveMechanic mechanic = dataSnapshot.getValue(LiveMechanic.class);
+                    if (mechanic != null) {
+                        double distance = distance(mechanic.latitude, mechanic.longitude,
+                                currentLatitude, currentLongitude);
+                        LatLng latLng = new LatLng(mechanic.latitude, mechanic.longitude);
+
+                        if (mechMarkers.containsKey(dataSnapshot.getKey())) {
+                            Marker marker = mechMarkers.get(dataSnapshot.getKey());
+                            marker.setTitle(distance + " KM");
+                            marker.setPosition(latLng);
+                        }
+                        else {
+                            Marker marker = mGoogleMap.addMarker(new MarkerOptions().position(latLng)
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.mechanic_maker_48_ic))
                                     .title(distance + " KM"));
-
-                            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(14));
-
+                            mechMarkers.put(dataSnapshot.getKey(), marker);
                         }
-
                     }
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                    if (mechMarkers.containsKey(dataSnapshot.getKey())) {
+                        Marker marker = mechMarkers.remove(dataSnapshot.getKey());
+                        marker.remove();
+                    }
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
                 }
 
                 @Override
@@ -192,7 +224,6 @@ public class MapActivity extends BaseDrawerActivity implements GoogleApiClient.C
 
                 }
             });
-
         }
 
         mLocationRequest = new LocationRequest();
