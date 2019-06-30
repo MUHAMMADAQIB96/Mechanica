@@ -40,6 +40,15 @@
 
         <include layout="@layout/customer_rate_card" />
 
+        <Button
+            android:id="@+id/btn_ok"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_small"
+            android:textColor="@color/white"
+            android:text="OK"
+            android:backgroundTint="@color/blue"/>
+
     </LinearLayout>
 
 </LinearLayout>

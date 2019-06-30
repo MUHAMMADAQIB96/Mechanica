@@ -87,7 +87,7 @@ public class HistoryActivity extends BaseDrawerActivity {
             }
         });
 
-        adapter = new HistoryListAdapter(this, jobs, user);
+        adapter = new HistoryListAdapter(this, jobs);
         listView.setAdapter(adapter);
 
     }

@@ -14,8 +14,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fyp.mechanica.R;
+import com.example.fyp.mechanica.helpers.Constants;
 import com.example.fyp.mechanica.models.DoneJob;
 import com.example.fyp.mechanica.models.User;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -24,18 +30,20 @@ import java.util.List;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.paperdb.Paper;
 
 public class HistoryListAdapter extends ArrayAdapter {
 
     private List<DoneJob> jobs;
     private Context context;
     private User user;
+    DatabaseReference dbRef;
 
-    public HistoryListAdapter(@NonNull Context context, List<DoneJob> jobs, User user) {
+    public HistoryListAdapter(@NonNull Context context, List<DoneJob> jobs) {
         super(context, R.layout.history_list_item, jobs);
         this.jobs = jobs;
         this.context = context;
-        this.user = user;
+//        this.user = user;
 
     }
 
@@ -46,14 +54,60 @@ public class HistoryListAdapter extends ArrayAdapter {
         View view = View.inflate(context, R.layout.history_list_item, null);
         TextView tvPKR = view.findViewById(R.id.tv_pkr);
         TextView tvDateTime = view.findViewById(R.id.tv_date_time);
-        TextView tvName = view.findViewById(R.id.tv_username);
+        final TextView tvName = view.findViewById(R.id.tv_username);
         CircleImageView civUserPhoto = view.findViewById(R.id.civ_user_photo);
         TextView tvAddress = view.findViewById(R.id.tv_location);
 
         DoneJob job = jobs.get(position);
+        dbRef = FirebaseDatabase.getInstance().getReference();
+
+        user = Paper.book().read(Constants.CURR_USER_KEY);
+//
+        if (user.userRole.equals("Mechanic")) {
+
+            dbRef.child("users").child(job.customerUID)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        User user = dataSnapshot.getValue(User.class);
+                        if (user != null) {
+                            tvName.setText(user.name);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        } else {
+            dbRef.child("users").child(job.mechanicUID)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        User user = dataSnapshot.getValue(User.class);
+                        if (user != null) {
+                            tvName.setText(user.name);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+        }
 
 //        tvName.setText(user.name);
         tvPKR.setText("PKR "+ getPKR(job.startedAt, job.endedAt));
+
+        String name = "";
+        tvName.setText(name);
 
         Date date = new Date(job.endedAt);
         DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(context.getApplicationContext());
@@ -71,7 +125,7 @@ public class HistoryListAdapter extends ArrayAdapter {
 
     private int getPKR(long start, long end) {
         long jobDuration = end - start;
-        return (int) ((jobDuration / 1000) / 60) * 5;
+        return (int) ((jobDuration / 1000) / 60) * Constants.PKR;
     }
 
     private void getAddress(double lat, double lng, TextView tvAddress) {
@@ -101,5 +155,6 @@ public class HistoryListAdapter extends ArrayAdapter {
             Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 
 }

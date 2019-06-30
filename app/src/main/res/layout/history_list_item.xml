@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:textColor="@color/black"
-        android:text="PKR 800"/>
+        android:text=""/>
 
     <LinearLayout
         android:layout_below="@id/tv_date_time"
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:textSize="@dimen/font_normal"
-                android:text="Zafar Ali"/>
+                android:text=""/>
 
             <RatingBar
                 android:id="@+id/rating_bar"
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/font_small"
-            android:text="Any thing you can type it here....."
+            android:text=""
             />
 
     </LinearLayout>

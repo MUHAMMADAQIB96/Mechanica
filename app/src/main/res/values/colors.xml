@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#005AFF</color>
+    <color name="colorPrimary">#005AFF</color>  <!--You can change app color here #000000 (black)-->
     <color name="colorPrimaryDark">#000</color>
     <color name="colorAccent">#005AFF</color>
 

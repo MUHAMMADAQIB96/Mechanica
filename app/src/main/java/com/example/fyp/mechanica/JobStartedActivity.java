@@ -1,5 +1,6 @@
 package com.example.fyp.mechanica;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
@@ -31,6 +32,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 
 import butterknife.BindView;
@@ -50,6 +52,7 @@ public class JobStartedActivity extends BaseDrawerActivity {
     @BindView(R.id.tv_pkr) TextView tvPKR;
     @BindView(R.id.tv_experience) TextView tvExperience;
     @BindView(R.id.rating_bar) RatingBar ratingBar;
+    @BindView(R.id.btn_ok) Button btnOK;
 
     long startTime, timeInMilliseconds = 0;
     Handler customHandler = new Handler();
@@ -87,9 +90,15 @@ public class JobStartedActivity extends BaseDrawerActivity {
                 bar.setTitle("Mechanic is Working");
             }
         }
+
+//        if (!currUser.userRole.equals("Mechanic")) {
+//            btnDone.setVisibility(View.GONE);
+//        }
+
         getJobStatus();
         startJobTime();
         ratingBarChange();
+
     }
 
 
@@ -111,6 +120,7 @@ public class JobStartedActivity extends BaseDrawerActivity {
         customHandler.removeCallbacks(updateTimerThread);
 
         bar.setTitle("Job Done");
+        btnDone.setEnabled(false);
         llRatingCard.setVisibility(View.VISIBLE);
 
         if (jobId != null && job != null) {
@@ -144,13 +154,27 @@ public class JobStartedActivity extends BaseDrawerActivity {
             getActiveJob(activeJob, activeJobId);
         }
 
-        long pkr = ((timeInMilliseconds / 1000) / 60) * 5;
+        long pkr = ((timeInMilliseconds / 1000) / 60) * Constants.PKR;
         tvPKR.setText("PKR "+ pkr);
 
         String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
         tvDateTime.setText(currentDateTimeString);
+    }
 
+    @OnClick(R.id.btn_ok)
+    public void OK() {
+        if (currUser.userRole.equals("Mechanic")) {
+            Intent intent = new Intent(this, MechanicMapActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
 
+        } else {
+            Intent intent = new Intent(this, MapActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
     }
 
     public void getActiveJob(ActiveJob job, final String jobId) {
@@ -188,7 +212,6 @@ public class JobStartedActivity extends BaseDrawerActivity {
                 if (dataSnapshot.exists()) {
                     User user = dataSnapshot.getValue(User.class);
                     tvExperience.setText("How was your experience with Mr. " + user.name + " ?");
-
 
                 }
             }
@@ -247,7 +270,7 @@ public class JobStartedActivity extends BaseDrawerActivity {
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
                 currRating = v;
                 if (currUser.id.equals(job.customerID)) {
-                    setRating(job.mechanicID, currRating);
+                    setRating(job.mechanicID, v);
 
                 } else {
                     setRating(job.customerID, v);
