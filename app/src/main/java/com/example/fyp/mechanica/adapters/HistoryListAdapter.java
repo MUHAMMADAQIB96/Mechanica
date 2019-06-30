@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +18,7 @@ import com.example.fyp.mechanica.R;
 import com.example.fyp.mechanica.helpers.Constants;
 import com.example.fyp.mechanica.models.DoneJob;
 import com.example.fyp.mechanica.models.User;
+import com.example.fyp.mechanica.models.UserRating;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -57,6 +59,7 @@ public class HistoryListAdapter extends ArrayAdapter {
         final TextView tvName = view.findViewById(R.id.tv_username);
         CircleImageView civUserPhoto = view.findViewById(R.id.civ_user_photo);
         TextView tvAddress = view.findViewById(R.id.tv_location);
+        final RatingBar bar = view.findViewById(R.id.rating_bar);
 
         DoneJob job = jobs.get(position);
         dbRef = FirebaseDatabase.getInstance().getReference();
@@ -82,6 +85,23 @@ public class HistoryListAdapter extends ArrayAdapter {
 
                 }
             });
+
+            dbRef.child("ratings").child(job.customerUID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        UserRating rating = dataSnapshot.getValue(UserRating.class);
+                        if (rating != null) {
+                            bar.setRating(rating.rating);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         } else {
             dbRef.child("users").child(job.mechanicUID)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -91,6 +111,23 @@ public class HistoryListAdapter extends ArrayAdapter {
                         User user = dataSnapshot.getValue(User.class);
                         if (user != null) {
                             tvName.setText(user.name);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            dbRef.child("ratings").child(job.mechanicUID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        UserRating rating = dataSnapshot.getValue(UserRating.class);
+                        if (rating != null) {
+                            bar.setRating(rating.rating);
                         }
                     }
                 }
